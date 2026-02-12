@@ -1,35 +1,63 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useRef, useState } from 'react';
+import { navigateToPage } from './routes/PageRouter';
+import { PageIds } from './constants/constants';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [currentPage, setCurrentPage] = useState<string>(PageIds.MainPage);
+    const defaultPageId = 'current-page';
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    useEffect(() => {
+        if (containerRef.current) {
+            const navigateToPageById = (pageId: string) => {
+                if (containerRef.current) {
+                    navigateToPage(pageId, containerRef.current, defaultPageId);
+                    
+                    const validPages = [PageIds.MainPage];
+                    if (validPages.includes(pageId as any)) {
+                        setCurrentPage(pageId);
+                    }
+                }
+            };
+
+            const initialHash = window.location.hash.slice(1);
+            if (initialHash) {
+                navigateToPageById(initialHash);
+            } else {
+                navigateToPageById(PageIds.MainPage);
+            }
+
+            const handleHashChange = () => {
+                const pageId = window.location.hash.slice(1) || PageIds.MainPage;
+                navigateToPageById(pageId);
+            };
+
+            window.addEventListener('hashchange', handleHashChange);
+
+            return () => {
+                window.removeEventListener('hashchange', handleHashChange);
+            };
+        }
+    }, []);
+
+    return (
+        <div className="app-container">
+            <div className="navbar">
+                <a 
+                    href={`#${PageIds.MainPage}`}
+                    className={currentPage === PageIds.MainPage ? 'active' : ''}
+                >
+                    Main
+                </a>
+            </div>
+            <div 
+                ref={containerRef} 
+                className="page-container"
+                style={{ minHeight: 'calc(100vh - 60px)' }}
+            />
+        </div>
+    );
 }
 
-export default App
+export default App;
