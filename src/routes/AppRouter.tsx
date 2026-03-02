@@ -1,16 +1,18 @@
 ﻿import { createBrowserRouter } from 'react-router-dom';
 import { PATHS } from './paths';
 
+import LandingPage from "../pages/LandingPage.tsx";
+import AdminPanel from "../pages/AdminPanel.tsx";
+import Offers from "../pages/Offers.tsx";
+import UserDashboard from "../pages/UserDashboard.tsx";
+
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { AuthGuard } from '../guards/AuthGuard';
 
-const LandingPage = () => <div>Landing Page</div>;
+
 const Login = () => <div>Login</div>;
 const SignUp = () => <div>Sign Up (Choose Role)</div>;
-const Offers = () => <div>Offers Page</div>;
-const UserDashboard = () => <div>User Dashboard</div>;
 const PhotographerDashboard = () => <div>Photographer Dashboard</div>;
-const AdminPanel = () => <div>Admin Panel</div>;
 const NotFound = () => <div className="text-center text-red-500 text-2xl mt-10">404 - Page Not Found</div>;
 
 export const router = createBrowserRouter([
