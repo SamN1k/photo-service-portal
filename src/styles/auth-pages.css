@@ -1,0 +1,11 @@
+﻿.auth-shell {
+    background-image: radial-gradient(circle at top, rgb(219 234 254), rgb(241 245 249) 45%);
+}
+
+.auth-card {
+    border: 1px solid rgb(226 232 240);
+}
+
+.auth-role-option {
+    min-height: 130px;
+}
