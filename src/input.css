@@ -1,3 +1,5 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
+@import "./styles/dashboard-theme.css";
+@import "./styles/auth-pages.css";
 
-@config "../tailwind.config.js";
+@config "./tailwind.config.js";

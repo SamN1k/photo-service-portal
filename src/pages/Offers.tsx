@@ -1,45 +1,34 @@
-﻿import { Link } from 'react-router-dom';
-import { PATHS } from '../routes/paths';
+const plans = [
+    { name: 'Basic', price: '€199', details: 'Sesiune 1h, 20 fotografii editate', popular: false },
+    { name: 'Pro', price: '€399', details: 'Sesiune 3h, 70 fotografii editate', popular: true },
+    { name: 'Studio', price: '€699', details: 'Sesiune full-day, 180 fotografii editate', popular: false },
+];
 
-const Landing = () => {
+const Offers = () => {
     return (
-        <div className="bg-white">
-            <section className="relative py-20 px-6 text-center bg-linear-to-r from-blue-600 to-indigo-700 text-white">
-                <div className="max-w-4xl mx-auto">
-                    <h1 className="text-5xl font-extrabold mb-6">Capture Every Moment</h1>
-                    <p className="text-xl mb-10 opacity-90">
-                        Connecting world-class photographers with people who want to preserve their most precious memories.
-                    </p>
-                    <div className="flex justify-center gap-4">
-                        <Link to={PATHS.SIGN_UP} className="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition">
-                            Get Started
-                        </Link>
-                        <Link to={PATHS.OFFERS} className="border-2 border-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-blue-600 transition">
-                            View Offers
-                        </Link>
-                    </div>
-                </div>
-            </section>
+        <div className="dashboard-shell min-h-screen px-6 py-12">
+            <div className="mx-auto w-full max-w-7xl">
+                <h1 className="text-4xl font-bold text-slate-900">Pachete foto</h1>
+                <p className="mt-2 text-slate-600">Prețuri și structură de ofertă inspirate de layout-urile moderne de dashboard.</p>
 
-            <section className="py-16 px-6 max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
-                <div className="p-6 border border-gray-100 rounded-xl shadow-sm text-center">
-                    <div className="text-3xl mb-4">📸</div>
-                    <h3 className="font-bold text-xl mb-2">Top Photographers</h3>
-                    <p className="text-gray-600">Vetted professionals for every occasion.</p>
+                <div className="mt-8 grid gap-5 md:grid-cols-3">
+                    {plans.map((plan) => (
+                        <article key={plan.name} className={`soft-panel card-hover p-6 ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}>
+                            {plan.popular && (
+                                <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Popular</span>
+                            )}
+                            <h3 className="mt-3 text-xl font-bold">{plan.name}</h3>
+                            <p className="mt-2 text-3xl font-extrabold text-slate-900">{plan.price}</p>
+                            <p className="mt-3 text-sm text-slate-600">{plan.details}</p>
+                            <button className="mt-6 w-full rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-700">
+                                Alege pachetul
+                            </button>
+                        </article>
+                    ))}
                 </div>
-                <div className="p-6 border border-gray-100 rounded-xl shadow-sm text-center">
-                    <div className="text-3xl mb-4">💰</div>
-                    <h3 className="font-bold text-xl mb-2">Best Prices</h3>
-                    <p className="text-gray-600">Competitive packages tailored to your budget.</p>
-                </div>
-                <div className="p-6 border border-gray-100 rounded-xl shadow-sm text-center">
-                    <div className="text-3xl mb-4">⚡</div>
-                    <h3 className="font-bold text-xl mb-2">Fast Delivery</h3>
-                    <p className="text-gray-600">Receive your edited photos within 48 hours.</p>
-                </div>
-            </section>
+            </div>
         </div>
     );
 };
 
-export default Landing;
+export default Offers;

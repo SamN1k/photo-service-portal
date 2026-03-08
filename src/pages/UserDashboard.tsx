@@ -1,19 +1,29 @@
-﻿const UserDashboard = () => {
+const UserDashboard = () => {
     return (
-        <div>
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">Welcome back, Traveler!</h1>
-            <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold mb-4">My Bookings</h3>
-                    <p className="text-gray-500">You have no active bookings at the moment.</p>
+        <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-slate-900">User Dashboard</h1>
+
+            <div className="grid gap-4 md:grid-cols-3">
+                <div className="soft-panel card-hover p-5">
+                    <p className="text-sm text-slate-500">Rezervări active</p>
+                    <p className="mt-2 text-3xl font-bold">3</p>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold mb-4">Notifications</h3>
-                    <ul className="space-y-3">
-                        <li className="text-sm text-gray-600">✔ Photographer "LensMaster" accepted your request.</li>
-                        <li className="text-sm text-gray-600">✔ Your payment for "Portrait Session" was successful.</li>
-                    </ul>
+                <div className="soft-panel card-hover p-5">
+                    <p className="text-sm text-slate-500">Cereri trimise</p>
+                    <p className="mt-2 text-3xl font-bold">12</p>
                 </div>
+                <div className="soft-panel card-hover p-5">
+                    <p className="text-sm text-slate-500">Buget mediu</p>
+                    <p className="mt-2 text-3xl font-bold">€320</p>
+                </div>
+            </div>
+
+            <div className="soft-panel p-5">
+                <h3 className="text-lg font-bold">Notificări recente</h3>
+                <ul className="mt-4 space-y-3 text-sm text-slate-600">
+                    <li>✅ Photographer "LensMaster" a confirmat sesiunea de weekend.</li>
+                    <li>✅ Portofoliul nou pentru evenimente corporate este disponibil.</li>
+                </ul>
             </div>
         </div>
     );
