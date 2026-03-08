@@ -5,15 +5,16 @@ import LandingPage from "../pages/LandingPage.tsx";
 import AdminPanel from "../pages/AdminPanel.tsx";
 import Offers from "../pages/Offers.tsx";
 import UserDashboard from "../pages/UserDashboard.tsx";
+import PhotographerDashboard from "../pages/PhotographerDashboard.tsx";
 import LoginPage from '../pages/LoginPage.tsx';
 import SignUpPage from '../pages/SignUpPage.tsx';
+
 
 
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { AuthGuard } from '../guards/AuthGuard';
 
 
-const PhotographerDashboard = () => <div>Photographer Dashboard</div>;
 const NotFound = () => <div className="text-center text-red-500 text-2xl mt-10">404 - Page Not Found</div>;
 
 export const router = createBrowserRouter([

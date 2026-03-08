@@ -1,22 +1,20 @@
 ﻿import { Link } from 'react-router-dom';
+
 import { PATHS } from '../routes/paths';
 
 const Header = () => {
     return (
-        <header className="bg-white border-b border-gray-200 h-16 flex items-center px-6 sticky top-0 z-50">
-            <div className="flex items-center justify-between w-full">
-                <Link to={PATHS.HOME} className="text-xl font-bold text-blue-600">
-                    PhotoPortal
+        <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 px-6 py-4 backdrop-blur">
+            <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+                <Link to={PATHS.HOME} className="text-lg font-bold text-slate-900">
+                    Photo<span className="text-blue-600">Portal</span>
                 </Link>
 
-                <nav className="flex items-center gap-6">
-                    <Link to={PATHS.OFFERS} className="text-gray-600 hover:text-blue-600 transition">
-                        Browse Offers
+                <nav className="flex items-center gap-3 text-sm">
+                    <Link to={PATHS.OFFERS} className="rounded-lg px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
+                        Oferte
                     </Link>
-                    <Link
-                        to={PATHS.LOGIN}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                    >
+                    <Link to={PATHS.LOGIN} className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white transition hover:bg-slate-700">
                         Login
                     </Link>
                 </nav>

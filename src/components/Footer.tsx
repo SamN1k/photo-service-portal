@@ -1,15 +1,12 @@
 ﻿const Footer = () => {
     return (
-        <footer className="bg-white border-t border-gray-200 py-8 px-6 mt-auto">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-                <p className="text-gray-500 text-sm">
-                    &copy; {new Date().getFullYear()} Photo Service Portal. All rights reserved.
-                </p>
-
-                <div className="flex gap-6 text-sm text-gray-500">
-                    <a href="#" className="hover:text-blue-600">Privacy Policy</a>
-                    <a href="#" className="hover:text-blue-600">Terms of Service</a>
-                    <a href="#" className="hover:text-blue-600">Contact Us</a>
+        <footer className="border-t border-slate-200 bg-white/90 px-6 py-5">
+            <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-2 text-sm text-slate-500 md:flex-row">
+                <p>&copy; {new Date().getFullYear()} Photo Service Portal.</p>
+                <div className="flex gap-5">
+                    <a href="#" className="hover:text-blue-600">Privacy</a>
+                    <a href="#" className="hover:text-blue-600">Terms</a>
+                    <a href="#" className="hover:text-blue-600">Support</a>
                 </div>
             </div>
         </footer>

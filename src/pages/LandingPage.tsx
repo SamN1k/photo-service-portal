@@ -1,42 +1,64 @@
 ﻿import { Link } from 'react-router-dom';
 import { PATHS } from '../routes/paths';
 
+const features = [
+    {
+        title: 'Photographers catalog',
+        description: 'Filtrare rapidă pe stil, buget și disponibilitate.',
+        icon: 'https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/1858b9-map-pin/dynamic/200/color.webp',
+    },
+    {
+        title: 'Booking simplificat',
+        description: 'Flux clar de rezervare cu notificări în timp real.',
+        icon: 'https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/196608-notify-heart/dynamic/200/color.webp',
+    },
+    {
+        title: 'Admin insights',
+        description: 'Monitorizare utilizatori, plăți și activitate platformă.',
+        icon: 'https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/39121b-medal/dynamic/200/color.webp',
+    },
+];
+
+
 const Landing = () => {
     return (
-        <div className="bg-white">
-            <section className="relative py-20 px-6 text-center bg-linear-to-r from-blue-600 to-indigo-700 text-white">
-                <div className="max-w-4xl mx-auto">
-                    <h1 className="text-5xl font-extrabold mb-6">Capture Every Moment</h1>
-                    <p className="text-xl mb-10 opacity-90">
-                        Connecting world-class photographers with people who want to preserve their most precious memories.
-                    </p>
-                    <div className="flex justify-center gap-4">
-                        <Link to={PATHS.SIGN_UP} className="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition">
-                            Get Started
-                        </Link>
-                        <Link to={PATHS.OFFERS} className="border-2 border-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-blue-600 transition">
-                            View Offers
-                        </Link>
+        <div className="dashboard-shell min-h-screen">
+            <section className="mx-auto grid w-full max-w-7xl gap-10 px-6 py-14 md:grid-cols-2 md:items-center">
+                <div>
+                    <p className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Minimal Dashboard style</p>
+                    <h1 className="mt-4 text-5xl font-bold leading-tight text-slate-900">Găsește fotograful potrivit, fără efort.</h1>
+                    <p className="mt-4 text-slate-600">Interfață modernă inspirată de dashboard-uri SaaS, cu carduri curate și ierarhie vizuală clară.</p>
+                    <div className="mt-7 flex flex-wrap gap-3">
+                        <Link to={PATHS.SIGN_UP} className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-700">Start acum</Link>
+                        <Link to={PATHS.OFFERS} className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-100">Vezi oferte</Link>
+                    </div>
+                </div>
+                <div className="soft-panel card-hover relative overflow-hidden p-7">
+                    <div className="glass-orb glass-orb--one" />
+                    <div className="relative z-10">
+                        <p className="text-sm text-slate-500">Platform activity</p>
+                        <h3 className="mt-1 text-2xl font-bold">1,240 users active this month</h3>
+                        <div className="mt-6 grid grid-cols-2 gap-3">
+                            <div className="rounded-xl bg-slate-50 p-4">
+                                <p className="text-xs text-slate-500">Rezervări</p>
+                                <p className="text-xl font-bold">+28%</p>
+                            </div>
+                            <div className="rounded-xl bg-slate-50 p-4">
+                                <p className="text-xs text-slate-500">Conversie</p>
+                                <p className="text-xl font-bold">4.8%</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
-
-            <section className="py-16 px-6 max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
-                <div className="p-6 border border-gray-100 rounded-xl shadow-sm text-center">
-                    <div className="text-3xl mb-4">📸</div>
-                    <h3 className="font-bold text-xl mb-2">Top Photographers</h3>
-                    <p className="text-gray-600">Vetted professionals for every occasion.</p>
-                </div>
-                <div className="p-6 border border-gray-100 rounded-xl shadow-sm text-center">
-                    <div className="text-3xl mb-4">💰</div>
-                    <h3 className="font-bold text-xl mb-2">Best Prices</h3>
-                    <p className="text-gray-600">Competitive packages tailored to your budget.</p>
-                </div>
-                <div className="p-6 border border-gray-100 rounded-xl shadow-sm text-center">
-                    <div className="text-3xl mb-4">⚡</div>
-                    <h3 className="font-bold text-xl mb-2">Fast Delivery</h3>
-                    <p className="text-gray-600">Receive your edited photos within 48 hours.</p>
-                </div>
+            <section className="mx-auto grid w-full max-w-7xl gap-5 px-6 pb-14 md:grid-cols-3">
+                {features.map((item) => (
+                    <article key={item.title} className="soft-panel card-hover p-6">
+                        <img src={item.icon} alt={item.title} className="h-12 w-12" loading="lazy" />
+                        <h3 className="mt-4 text-lg font-bold">{item.title}</h3>
+                        <p className="mt-2 text-sm text-slate-600">{item.description}</p>
+                    </article>
+                ))}
             </section>
         </div>
     );

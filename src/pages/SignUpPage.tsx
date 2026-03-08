@@ -1,15 +1,31 @@
 ﻿import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { PATHS } from '../routes/paths';
 import type { UserRole } from '../routes/paths';
 
 type AuthRole = Exclude<UserRole, 'guest'>;
 
-const ROLE_OPTIONS: { value: AuthRole; label: string; helper: string }[] = [
-    { value: 'user', label: 'User obișnuit', helper: 'Potrivit pentru clienți care caută fotografi.' },
-    { value: 'photographer', label: 'Fotograf', helper: 'Pentru profesioniști care oferă servicii foto.' },
-    { value: 'admin', label: 'Admin', helper: 'Pentru administrarea aplicației și moderare.' },
+const ROLE_OPTIONS: { value: AuthRole; label: string; helper: string; icon: string }[] = [
+    {
+        value: 'user',
+        label: 'User obișnuit',
+        helper: 'Potrivit pentru clienți care caută fotografi.',
+        icon: 'https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/4e7918-thumb-up/dynamic/200/color.webp',
+    },
+    {
+        value: 'photographer',
+        label: 'Fotograf',
+        helper: 'Pentru profesioniști care oferă servicii foto.',
+        icon: 'https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/5f20be-computer/dynamic/200/color.webp',
+    },
+    {
+        value: 'admin',
+        label: 'Admin',
+        helper: 'Pentru administrarea aplicației și moderare.',
+        icon: 'https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/778c78-key/dynamic/200/color.webp',
+    },
 ];
 
 const SignUpPage = () => {
@@ -17,18 +33,15 @@ const SignUpPage = () => {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [statusMessage, setStatusMessage] = useState('');
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setStatusMessage(`Simulare înregistrare: ${fullName} (${selectedRole}) - ${email}`);
+        toast.success(`Cont creat pentru ${fullName} (${selectedRole}).`);
     };
 
     return (
-        /* S-a adăugat auth-shell */
-        <main className="auth-shell min-h-screen bg-slate-100 px-4 py-10">
-            /* S-a adăugat auth-card */
-            <div className="auth-card mx-auto w-full max-w-2xl rounded-2xl bg-white p-8 shadow-lg">
+        <main className="auth-shell min-h-screen px-4 py-10">
+            <div className="auth-card card-hover mx-auto w-full max-w-3xl rounded-2xl bg-white p-8 shadow-lg">
                 <h1 className="text-3xl font-bold text-slate-900">Înregistrare</h1>
                 <p className="mt-2 text-slate-600">Creează un cont nou și alege tipul de utilizator.</p>
 
@@ -39,8 +52,7 @@ const SignUpPage = () => {
                             {ROLE_OPTIONS.map((role) => (
                                 <label
                                     key={role.value}
-                                    /* S-a adăugat auth-role-option */
-                                    className={`auth-role-option cursor-pointer rounded-xl border p-4 transition ${
+                                    className={`auth-role-option card-hover cursor-pointer rounded-xl border p-4 transition ${
                                         selectedRole === role.value
                                             ? 'border-blue-600 bg-blue-50'
                                             : 'border-slate-200 hover:border-blue-300'
@@ -54,6 +66,7 @@ const SignUpPage = () => {
                                         onChange={() => setSelectedRole(role.value)}
                                         className="sr-only"
                                     />
+                                    <img className="mb-2 h-10 w-10" src={role.icon} alt={role.label} loading="lazy" />
                                     <p className="font-semibold text-slate-900">{role.label}</p>
                                     <p className="mt-1 text-sm text-slate-600">{role.helper}</p>
                                 </label>
@@ -113,8 +126,6 @@ const SignUpPage = () => {
                         Creează cont
                     </button>
                 </form>
-
-                {statusMessage && <p className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-700">{statusMessage}</p>}
 
                 <p className="mt-6 text-sm text-slate-600">
                     Ai deja cont?{' '}
