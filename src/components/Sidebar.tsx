@@ -1,42 +1,45 @@
-﻿import { NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
 import { PATHS, type UserRole } from '../routes/paths';
 
+interface NavItem {
+    name: string;
+    path: string;
+    roles: UserRole[];
+}
+
+const navItems: NavItem[] = [
+    { name: 'Rezervarile mele', path: PATHS.USER_DASHBOARD, roles: ['user'] },
+    { name: 'Ofertele mele', path: PATHS.PHOTOGRAPHER_DASHBOARD, roles: ['photographer'] },
+    { name: 'Administrare', path: PATHS.ADMIN_PANEL, roles: ['admin'] },
+    { name: 'Catalog oferte', path: PATHS.OFFERS, roles: ['user', 'photographer', 'admin'] },
+];
+
+const linkClassName = ({ isActive }: { isActive: boolean }) =>
+    `rounded-lg px-3 py-2 text-sm font-semibold transition ${
+        isActive ? 'bg-teal-700 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
+    }`;
+
 const Sidebar = () => {
-    // In a real app, you would get this from your Auth context/state
-    const userRole: UserRole = 'user';
-
-    const navItems = [
-        { name: 'User Dashboard', path: PATHS.USER_DASHBOARD, role: 'user', emoji: '📊' },
-        { name: 'My Portfolio', path: PATHS.PHOTOGRAPHER_DASHBOARD, role: 'photographer', emoji: '🖼️' },
-        { name: 'Admin Panel', path: PATHS.ADMIN_PANEL, role: 'admin', emoji: '🛡️' },
-
-    ];
+    const { user } = useAuth();
+    const visibleItems = navItems.filter((item) => user && item.roles.includes(user.role));
 
     return (
-        <aside className="hidden w-72 border-r border-slate-200 bg-white/80 p-5 backdrop-blur lg:block">
-            <div className="mb-6 soft-panel p-4">
-                <p className="text-xs uppercase tracking-wider text-slate-400">workspace</p>
-                <p className="mt-1 font-semibold text-slate-800">Minimal Dashboard UI</p>
+        <aside className="border-r border-slate-200 bg-white p-4 lg:w-72">
+            <div className="hidden lg:block">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase text-slate-500">Workspace</p>
+                    <p className="mt-1 font-semibold text-slate-950">{user?.fullName}</p>
+                    <p className="mt-1 text-sm text-slate-500">{user?.email}</p>
+                </div>
             </div>
 
-            <nav className="flex flex-col gap-2">
-                {navItems
-                    .filter((item) => item.role === userRole)
-                    .map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            className={({ isActive }) =>
-                                `flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-medium transition ${
-                                    isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-600 hover:bg-slate-100'
-                                }`
-                            }
-                        >
-                            <span>{item.emoji}</span>
-                            {item.name}
-                        </NavLink>
-                    ))}
-
+            <nav className="mt-0 flex gap-2 overflow-x-auto lg:mt-5 lg:flex-col lg:overflow-visible">
+                {visibleItems.map((item) => (
+                    <NavLink key={item.path} to={item.path} className={linkClassName}>
+                        {item.name}
+                    </NavLink>
+                ))}
             </nav>
         </aside>
     );

@@ -1,67 +1,69 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import Footer from '../components/Footer';
+import Header from '../components/Header';
 import { PATHS } from '../routes/paths';
 
-const features = [
-    {
-        title: 'Photographers catalog',
-        description: 'Filtrare rapidă pe stil, buget și disponibilitate.',
-        icon: 'https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/1858b9-map-pin/dynamic/200/color.webp',
-    },
-    {
-        title: 'Booking simplificat',
-        description: 'Flux clar de rezervare cu notificări în timp real.',
-        icon: 'https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/196608-notify-heart/dynamic/200/color.webp',
-    },
-    {
-        title: 'Admin insights',
-        description: 'Monitorizare utilizatori, plăți și activitate platformă.',
-        icon: 'https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/39121b-medal/dynamic/200/color.webp',
-    },
-];
-
-
-const Landing = () => {
+const LandingPage = () => {
     return (
-        <div className="dashboard-shell min-h-screen">
-            <section className="mx-auto grid w-full max-w-7xl gap-10 px-6 py-14 md:grid-cols-2 md:items-center">
-                <div>
-                    <p className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Minimal Dashboard style</p>
-                    <h1 className="mt-4 text-5xl font-bold leading-tight text-slate-900">Găsește fotograful potrivit, fără efort.</h1>
-                    <p className="mt-4 text-slate-600">Interfață modernă inspirată de dashboard-uri SaaS, cu carduri curate și ierarhie vizuală clară.</p>
-                    <div className="mt-7 flex flex-wrap gap-3">
-                        <Link to={PATHS.SIGN_UP} className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-700">Start acum</Link>
-                        <Link to={PATHS.OFFERS} className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-100">Vezi oferte</Link>
-                    </div>
-                </div>
-                <div className="soft-panel card-hover relative overflow-hidden p-7">
-                    <div className="glass-orb glass-orb--one" />
-                    <div className="relative z-10">
-                        <p className="text-sm text-slate-500">Platform activity</p>
-                        <h3 className="mt-1 text-2xl font-bold">1,240 users active this month</h3>
-                        <div className="mt-6 grid grid-cols-2 gap-3">
-                            <div className="rounded-xl bg-slate-50 p-4">
-                                <p className="text-xs text-slate-500">Rezervări</p>
-                                <p className="text-xl font-bold">+28%</p>
-                            </div>
-                            <div className="rounded-xl bg-slate-50 p-4">
-                                <p className="text-xs text-slate-500">Conversie</p>
-                                <p className="text-xl font-bold">4.8%</p>
-                            </div>
+        <div className="app-shell min-h-screen">
+            <Header />
+            <main>
+                <section className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 lg:grid-cols-[1fr_480px] lg:items-center">
+                    <div>
+                        <p className="text-sm font-semibold uppercase text-teal-700">React + TypeScript demo</p>
+                        <h1 className="mt-3 text-5xl font-bold leading-tight text-slate-950">Photo Service Portal</h1>
+                        <p className="mt-4 max-w-2xl text-lg text-slate-700">
+                            Aplicatie frontend completa pentru cautare fotografi, rezervari, oferte si administrare, folosind servicii mock si date locale.
+                        </p>
+                        <div className="mt-7 flex flex-wrap gap-3">
+                            <Link to={PATHS.LOGIN} className="rounded-lg bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-700">
+                                Intra in demo
+                            </Link>
+                            <Link to={PATHS.OFFERS} className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-800 hover:bg-slate-50">
+                                Vezi catalogul
+                            </Link>
                         </div>
                     </div>
-                </div>
-            </section>
-            <section className="mx-auto grid w-full max-w-7xl gap-5 px-6 pb-14 md:grid-cols-3">
-                {features.map((item) => (
-                    <article key={item.title} className="soft-panel card-hover p-6">
-                        <img src={item.icon} alt={item.title} className="h-12 w-12" loading="lazy" />
-                        <h3 className="mt-4 text-lg font-bold">{item.title}</h3>
-                        <p className="mt-2 text-sm text-slate-600">{item.description}</p>
+
+                    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                        <img
+                            src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1100&q=80"
+                            alt="Camera foto profesionala"
+                            className="h-72 w-full object-cover"
+                        />
+                        <div className="grid divide-y divide-slate-200 p-4 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                            {[
+                                ['3', 'Conturi demo'],
+                                ['3x', 'CRUD complet'],
+                                ['401-500', 'HTTP UI'],
+                            ].map(([value, label]) => (
+                                <div key={label} className="p-3">
+                                    <p className="text-2xl font-bold text-slate-950">{value}</p>
+                                    <p className="mt-1 text-sm text-slate-500">{label}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                <section className="mx-auto grid w-full max-w-7xl gap-4 px-4 pb-12 md:grid-cols-3">
+                    <article className="soft-panel p-5">
+                        <h2 className="text-lg font-bold text-slate-950">Flux client</h2>
+                        <p className="mt-2 text-sm text-slate-600">Clientul se autentifica, filtreaza ofertele si gestioneaza cereri de rezervare.</p>
                     </article>
-                ))}
-            </section>
+                    <article className="soft-panel p-5">
+                        <h2 className="text-lg font-bold text-slate-950">Flux fotograf</h2>
+                        <p className="mt-2 text-sm text-slate-600">Fotograful creeaza, editeaza, arhiveaza si sterge oferte proprii.</p>
+                    </article>
+                    <article className="soft-panel p-5">
+                        <h2 className="text-lg font-bold text-slate-950">Flux admin</h2>
+                        <p className="mt-2 text-sm text-slate-600">Adminul listeaza utilizatori, aplica filtre si ruleaza CRUD complet pe conturi.</p>
+                    </article>
+                </section>
+            </main>
+            <Footer />
         </div>
     );
 };
 
-export default Landing;
+export default LandingPage;

@@ -6,16 +6,12 @@ import Sidebar from '../components/Sidebar';
 
 export const DashboardLayout = () => {
     return (
-        <div className="dashboard-shell flex min-h-screen flex-col">
+        <div className="app-shell flex min-h-screen flex-col">
             <Header />
-            <div className="mx-auto flex w-full max-w-7xl flex-1">
+            <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col lg:flex-row">
                 <Sidebar />
-                <main className="relative flex-1 overflow-hidden p-6 md:p-8">
-                    <div className="glass-orb glass-orb--one" />
-                    <div className="glass-orb glass-orb--two" />
-                    <div className="relative z-10">
-                        <Outlet />
-                    </div>
+                <main className="flex-1 p-4 md:p-8">
+                    <Outlet />
                 </main>
             </div>
             <Footer />

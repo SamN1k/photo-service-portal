@@ -1,73 +1,39 @@
-# React + TypeScript + Vite
+# Photo Service Portal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicatie demo Frontend realizata in React + TypeScript, fara backend. Datele sunt mock si sunt persistate in `localStorage`.
 
-Currently, two official plugins are available:
+## Rulare
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Aplicatia ruleaza implicit la `http://127.0.0.1:5173/`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Conturi demo
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Toate conturile folosesc parola `demo1234`.
+
+| Rol | Email |
+| --- | --- |
+| User | `user@demo.local` |
+| Fotograf | `photographer@demo.local` |
+| Admin | `admin@demo.local` |
+
+## Functionalitati
+
+- autentificare simulata si sesiune restaurata din `localStorage`;
+- rute protejate pentru `user`, `photographer` si `admin`;
+- CRUD cu validari pentru rezervari, oferte si utilizatori;
+- listare cu cautare, filtrare, sortare si paginare gestionate in servicii mock;
+- stari UI de loading, empty si error;
+- pagini dedicate pentru `401`, `403`, `404` si `500`;
+- layout responsive cu header, sidebar si footer.
+
+## Verificare
+
+```bash
+npm run lint
+npm run build
 ```

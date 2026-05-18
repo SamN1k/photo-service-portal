@@ -1,28 +1,21 @@
-﻿import { createBrowserRouter } from 'react-router-dom';
-import { PATHS } from './paths';
-
-import LandingPage from "../pages/LandingPage.tsx";
-import AdminPanel from "../pages/AdminPanel.tsx";
-import Offers from "../pages/Offers.tsx";
-import UserDashboard from "../pages/UserDashboard.tsx";
-import PhotographerDashboard from "../pages/PhotographerDashboard.tsx";
-import LoginPage from '../pages/LoginPage.tsx';
-import SignUpPage from '../pages/SignUpPage.tsx';
-
-
-
-import { DashboardLayout } from '../layouts/DashboardLayout';
+import { createBrowserRouter } from 'react-router-dom';
+import AdminPanel from '../pages/AdminPanel';
+import LandingPage from '../pages/LandingPage';
+import LoginPage from '../pages/LoginPage';
+import Offers from '../pages/Offers';
+import PhotographerDashboard from '../pages/PhotographerDashboard';
+import SignUpPage from '../pages/SignUpPage';
+import UserDashboard from '../pages/UserDashboard';
+import HttpErrorPage from '../pages/errors/HttpErrorPage';
 import { AuthGuard } from '../guards/AuthGuard';
-
-
-const NotFound = () => <div className="text-center text-red-500 text-2xl mt-10">404 - Page Not Found</div>;
+import { DashboardLayout } from '../layouts/DashboardLayout';
+import { PATHS } from './paths';
 
 export const router = createBrowserRouter([
     { path: PATHS.HOME, element: <LandingPage /> },
     { path: PATHS.LOGIN, element: <LoginPage /> },
     { path: PATHS.SIGN_UP, element: <SignUpPage /> },
     { path: PATHS.OFFERS, element: <Offers /> },
-
     {
         element: <AuthGuard allowedRoles={['user']} />,
         children: [
@@ -32,7 +25,6 @@ export const router = createBrowserRouter([
             },
         ],
     },
-
     {
         element: <AuthGuard allowedRoles={['photographer']} />,
         children: [
@@ -42,16 +34,47 @@ export const router = createBrowserRouter([
             },
         ],
     },
-
     {
         element: <AuthGuard allowedRoles={['admin']} />,
         children: [
             {
-                element: <DashboardLayout />, // Or a specific AdminLayout
+                element: <DashboardLayout />,
                 children: [{ path: PATHS.ADMIN_PANEL, element: <AdminPanel /> }],
             },
         ],
     },
-    
-    { path: PATHS.NOT_FOUND, element: <NotFound /> },
+    {
+        path: PATHS.UNAUTHORIZED,
+        element: (
+            <HttpErrorPage
+                statusCode={401}
+                title="Unauthorized"
+                description="Trebuie sa fii autentificat pentru a accesa aceasta pagina."
+            />
+        ),
+    },
+    {
+        path: PATHS.FORBIDDEN,
+        element: (
+            <HttpErrorPage
+                statusCode={403}
+                title="Forbidden"
+                description="Contul curent nu are rolul necesar pentru aceasta zona."
+            />
+        ),
+    },
+    {
+        path: PATHS.SERVER_ERROR,
+        element: (
+            <HttpErrorPage
+                statusCode={500}
+                title="Internal Server Error"
+                description="Am simulat o eroare de serviciu mock. Datele raman locale si pot fi reincarcate."
+            />
+        ),
+    },
+    {
+        path: PATHS.NOT_FOUND,
+        element: <HttpErrorPage statusCode={404} title="Not Found" description="Ruta accesata nu exista in aplicatia demo." />,
+    },
 ]);

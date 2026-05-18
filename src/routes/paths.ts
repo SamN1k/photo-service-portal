@@ -1,4 +1,4 @@
-﻿export const PATHS = {
+export const PATHS = {
     HOME: '/',
     LOGIN: '/login',
     SIGN_UP: '/signup',
@@ -6,8 +6,10 @@
     USER_DASHBOARD: '/dashboard/user',
     PHOTOGRAPHER_DASHBOARD: '/dashboard/photographer',
     ADMIN_PANEL: '/admin',
-    NOT_FOUND: '*'
+    UNAUTHORIZED: '/401',
+    FORBIDDEN: '/403',
+    SERVER_ERROR: '/500',
+    NOT_FOUND: '*',
 } as const;
 
-// Types for role management
-export type UserRole = 'user' | 'photographer' | 'admin' | 'guest';
+export type { UserRole } from '../types/models';

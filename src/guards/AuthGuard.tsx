@@ -1,27 +1,21 @@
-﻿import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
 import { PATHS, type UserRole } from '../routes/paths';
 
 interface AuthGuardProps {
-    allowedRoles: UserRole[];
+    allowedRoles?: UserRole[];
 }
 
-const isUserRole = (value: string | null): value is UserRole => {
-    return value === 'user' || value === 'photographer' || value === 'admin' || value === 'guest';
-};
-
-
 export const AuthGuard = ({ allowedRoles }: AuthGuardProps) => {
-    const isAuthenticated = true; // e.g., !!localStorage.getItem('token');
-    const storedRole = typeof window !== 'undefined' ? window.localStorage.getItem('mockRole') : null;
-    const userRole: UserRole = isUserRole(storedRole) ? storedRole : 'user';
-
+    const { isAuthenticated, user } = useAuth();
+    const location = useLocation();
 
     if (!isAuthenticated) {
-        return <Navigate to={PATHS.LOGIN} replace />;
+        return <Navigate to={PATHS.UNAUTHORIZED} replace state={{ from: location.pathname }} />;
     }
 
-    if (!allowedRoles.includes(userRole)) {
-        return <Navigate to={PATHS.HOME} replace />;
+    if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+        return <Navigate to={PATHS.FORBIDDEN} replace state={{ from: location.pathname }} />;
     }
 
     return <Outlet />;
