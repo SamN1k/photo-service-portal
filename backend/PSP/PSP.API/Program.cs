@@ -6,22 +6,37 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string frontendCorsPolicy = "FrontendCorsPolicy";
 
+// Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Business Logic
 builder.Services.AddSingleton<BusinessLogic>();
-builder.Services.AddScoped<IAuthLogic>(provider => provider.GetRequiredService<BusinessLogic>().GetAuthLogic());
-builder.Services.AddScoped<IUserLogic>(provider => provider.GetRequiredService<BusinessLogic>().GetUserLogic());
-builder.Services.AddScoped<IOfferLogic>(provider => provider.GetRequiredService<BusinessLogic>().GetOfferLogic());
-builder.Services.AddScoped<IBookingLogic>(provider => provider.GetRequiredService<BusinessLogic>().GetBookingLogic());
 
+builder.Services.AddScoped<IAuthLogic>(
+    provider => provider.GetRequiredService<BusinessLogic>().GetAuthLogic());
+
+builder.Services.AddScoped<IUserLogic>(
+    provider => provider.GetRequiredService<BusinessLogic>().GetUserLogic());
+
+builder.Services.AddScoped<IOfferLogic>(
+    provider => provider.GetRequiredService<BusinessLogic>().GetOfferLogic());
+
+builder.Services.AddScoped<IBookingLogic>(
+    provider => provider.GetRequiredService<BusinessLogic>().GetBookingLogic());
+
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(frontendCorsPolicy, policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", "http://127.0.0.1:5173", "https://photo-service-portal-62e62kwgg-samn1ks-projects.vercel.app")
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "https://photo-service-portal-62e62kwgg-samn1ks-projects.vercel.app"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -29,16 +44,19 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// Middleware
 app.UseCors(frontendCorsPolicy);
 
 app.UseAuthorization();
 
+// Global Exception Handler
 app.Use(async (context, next) =>
 {
     try
@@ -48,10 +66,19 @@ app.Use(async (context, next) =>
     catch (Exception)
     {
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        await context.Response.WriteAsJsonAsync(new ErrorResponseDto(500, "A aparut o eroare neasteptata pe server."));
+
+        await context.Response.WriteAsJsonAsync(
+            new ErrorResponseDto(
+                500,
+                "A aparut o eroare neasteptata pe server."
+            )
+        );
     }
 });
 
 app.MapControllers();
 
-app.Run();
+// Render Port Configuration
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+
+app.Run($"http://0.0.0.0:{port}");
