@@ -11,7 +11,7 @@ interface ApiErrorResponse {
 type GlobalApiErrorHandler = (error: MockHttpError) => void;
 
 const SESSION_KEY = 'photoPortal.session';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5280/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5280/api';
 
 let globalApiErrorHandler: GlobalApiErrorHandler | null = null;
 
