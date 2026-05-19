@@ -7,6 +7,7 @@ export const PATHS = {
     USER_PAYMENT: '/dashboard/user/payment/:bookingId',
     PHOTOGRAPHER_DASHBOARD: '/dashboard/photographer',
     ADMIN_PANEL: '/admin',
+    ACCOUNT_SETTINGS: '/dashboard/settings',
     UNAUTHORIZED: '/401',
     FORBIDDEN: '/403',
     SERVER_ERROR: '/500',

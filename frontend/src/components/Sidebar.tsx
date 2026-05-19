@@ -13,6 +13,7 @@ const navItems: NavItem[] = [
     { name: 'Ofertele mele', path: PATHS.PHOTOGRAPHER_DASHBOARD, roles: ['photographer'] },
     { name: 'Administrare', path: PATHS.ADMIN_PANEL, roles: ['admin'] },
     { name: 'Catalog oferte', path: PATHS.OFFERS, roles: ['user', 'photographer', 'admin'] },
+    { name: 'Setari cont', path: PATHS.ACCOUNT_SETTINGS, roles: ['user', 'photographer', 'admin'] },
 ];
 
 const linkClassName = ({ isActive }: { isActive: boolean }) =>

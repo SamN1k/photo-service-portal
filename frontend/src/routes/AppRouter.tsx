@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
+import AccountSettingsPage from '../pages/AccountSettingsPage';
 import AdminPanel from '../pages/AdminPanel';
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
@@ -26,6 +27,15 @@ export const router = createBrowserRouter([
                     { path: PATHS.USER_DASHBOARD, element: <UserDashboard /> },
                     { path: PATHS.USER_PAYMENT, element: <PaymentPage /> },
                 ],
+            },
+        ],
+    },
+    {
+        element: <AuthGuard allowedRoles={['user', 'photographer', 'admin']} />,
+        children: [
+            {
+                element: <DashboardLayout />,
+                children: [{ path: PATHS.ACCOUNT_SETTINGS, element: <AccountSettingsPage /> }],
             },
         ],
     },
