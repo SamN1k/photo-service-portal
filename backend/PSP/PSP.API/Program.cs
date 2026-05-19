@@ -33,10 +33,10 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "https://photo-service-portal-62e62kwgg-samn1ks-projects.vercel.app"
-            )
+    "http://localhost:5173",
+    "https://photo-service-portal-62e62kwgg-samn1ks-projects.vercel.app",
+    "https://defensive-fang-provoke.ngrok-free.dev"
+)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
