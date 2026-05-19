@@ -6,6 +6,7 @@ import { storageService } from './storageService';
 const BOOKINGS_KEY = 'photoPortal.bookings';
 
 export type BookingSort = 'eventDateAsc' | 'eventDateDesc' | 'budgetDesc' | 'newest';
+type StoredBooking = Omit<Booking, 'status'> & { status: BookingStatus | 'cancelled' | 'completed' };
 
 export interface BookingListParams {
     query?: string;
@@ -20,11 +21,23 @@ export interface BookingListParams {
 
 const createId = () => `booking-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
+const normalizeBooking = (booking: StoredBooking): Booking => ({
+    ...booking,
+    status: booking.status === 'cancelled' ? 'rejected' : booking.status === 'completed' ? 'finalized' : booking.status,
+});
+
 const getBookings = (): Booking[] => {
-    const bookings = storageService.read<Booking[]>(BOOKINGS_KEY, []);
+    const bookings = storageService.read<StoredBooking[]>(BOOKINGS_KEY, []);
 
     if (bookings.length > 0) {
-        return bookings;
+        const normalizedBookings = bookings.map(normalizeBooking);
+        const wasMigrated = normalizedBookings.some((booking, index) => booking.status !== bookings[index].status);
+
+        if (wasMigrated) {
+            saveBookings(normalizedBookings);
+        }
+
+        return normalizedBookings;
     }
 
     storageService.write(BOOKINGS_KEY, MOCK_BOOKINGS);
@@ -98,6 +111,18 @@ export const bookingService = {
             pageSize,
             totalPages,
         };
+    },
+
+    async getBooking(bookingId: string): Promise<Booking> {
+        await delay();
+
+        const booking = getBookings().find((candidate) => candidate.id === bookingId);
+
+        if (!booking) {
+            throw new MockHttpError(404, 'Rezervarea nu exista.');
+        }
+
+        return booking;
     },
 
     async createBooking(input: BookingInput, client: UserRecord, offer: PhotoOffer): Promise<Booking> {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Badge } from '../components/ui/Badge';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -41,8 +41,9 @@ const statusOptions: Array<SelectOption<'all' | BookingStatus>> = [
     { value: 'all', label: 'Toate statusurile' },
     { value: 'pending', label: 'In asteptare' },
     { value: 'confirmed', label: 'Confirmate' },
-    { value: 'cancelled', label: 'Anulate' },
-    { value: 'completed', label: 'Finalizate' },
+    { value: 'rejected', label: 'Respinse' },
+    { value: 'paid', label: 'Achitate' },
+    { value: 'finalized', label: 'Finalizate' },
 ];
 
 const sortOptions: Array<SelectOption<BookingSort>> = [
@@ -55,9 +56,12 @@ const sortOptions: Array<SelectOption<BookingSort>> = [
 const statusTone: Record<BookingStatus, 'success' | 'warning' | 'danger' | 'neutral'> = {
     pending: 'warning',
     confirmed: 'success',
-    cancelled: 'danger',
-    completed: 'neutral',
+    rejected: 'danger',
+    paid: 'success',
+    finalized: 'neutral',
 };
+
+const canPayBooking = (status: BookingStatus) => !['rejected', 'paid', 'finalized'].includes(status);
 
 const UserDashboard = () => {
     const { user } = useAuth();
@@ -407,7 +411,15 @@ const UserDashboard = () => {
                                         <Badge tone={statusTone[booking.status]}>{booking.status}</Badge>
                                     </td>
                                     <td className="py-3">
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-wrap gap-2">
+                                            {canPayBooking(booking.status) && (
+                                                <Link
+                                                    to={PATHS.USER_PAYMENT.replace(':bookingId', booking.id)}
+                                                    className="payment-outline-button rounded-lg border border-emerald-500 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 transition-colors"
+                                                >
+                                                    Mergi spre achitare
+                                                </Link>
+                                            )}
                                             <button
                                                 type="button"
                                                 onClick={() => handleEdit(booking)}

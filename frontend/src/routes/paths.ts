@@ -4,6 +4,7 @@ export const PATHS = {
     SIGN_UP: '/signup',
     OFFERS: '/offers',
     USER_DASHBOARD: '/dashboard/user',
+    USER_PAYMENT: '/dashboard/user/payment/:bookingId',
     PHOTOGRAPHER_DASHBOARD: '/dashboard/photographer',
     ADMIN_PANEL: '/admin',
     UNAUTHORIZED: '/401',

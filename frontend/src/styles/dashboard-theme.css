@@ -77,3 +77,35 @@ button {
     transform: translateY(-2px);
     box-shadow: 0 18px 45px -26px rgb(15 23 42 / 45%);
 }
+
+.payment-outline-button:hover {
+    background: #bbf7d0;
+    color: #111827;
+    font-family: Arial, sans-serif;
+}
+
+.payment-method-option {
+    display: flex;
+    min-height: 3.25rem;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 0.75rem;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.payment-method-option:hover,
+.payment-method-option-active {
+    border-color: #22c55e;
+    background: #dcfce7;
+}
+
+.payment-checkmark {
+    display: inline-block;
+    width: 1.35rem;
+    height: 0.75rem;
+    border-bottom: 4px solid #166534;
+    border-left: 4px solid #166534;
+    transform: rotate(-45deg);
+}
