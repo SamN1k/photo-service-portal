@@ -88,7 +88,7 @@ const Offers = () => {
     }, [category, query]);
 
     const handleSimulateError = () => {
-        toast.info('Se simuleaza o eroare 500 in serviciul mock.');
+        toast.info('Se simuleaza o eroare 500 in serviciul API.');
         void loadOffers(true);
     };
 
@@ -101,7 +101,7 @@ const Offers = () => {
                         <p className="text-sm font-semibold uppercase text-teal-700">Catalog public</p>
                         <h1 className="mt-1 text-4xl font-bold text-slate-950">Oferte foto</h1>
                         <p className="mt-2 max-w-2xl text-slate-600">
-                            Listarea foloseste date mock, cu filtrare, sortare si paginare calculate in service.
+                            Listarea foloseste API-ul backend, cu filtrare, sortare si paginare calculate in BusinessLayer.
                         </p>
                     </div>
                     <button type="button" onClick={handleSimulateError} className="rounded-lg border border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-rose-700">

@@ -211,7 +211,7 @@ const AdminPanel = () => {
             return;
         }
 
-        const confirmed = window.confirm('Stergi utilizatorul selectat? Actiunea modifica datele locale mock.');
+        const confirmed = window.confirm('Stergi utilizatorul selectat? Actiunea modifica datele din API.');
 
         if (!confirmed) {
             return;
@@ -236,7 +236,7 @@ const AdminPanel = () => {
         <div className="space-y-6">
             <PageHeader
                 title="Admin Control Panel"
-                description="Administrare mock pentru utilizatori, roluri si statusuri persistate in localStorage."
+                description="Administrare prin API pentru utilizatori, roluri si statusuri gestionate in BusinessLayer."
                 actions={
                     <button type="button" onClick={handleSimulateError} className="rounded-lg border border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-rose-700">
                         Simuleaza 500

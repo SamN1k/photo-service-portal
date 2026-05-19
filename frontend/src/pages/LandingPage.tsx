@@ -13,7 +13,7 @@ const LandingPage = () => {
                         <p className="text-sm font-semibold uppercase text-teal-700">React + TypeScript demo</p>
                         <h1 className="mt-3 text-5xl font-bold leading-tight text-slate-950">Photo Service Portal</h1>
                         <p className="mt-4 max-w-2xl text-lg text-slate-700">
-                            Aplicatie frontend completa pentru cautare fotografi, rezervari, oferte si administrare, folosind servicii mock si date locale.
+                            Aplicatie completa pentru cautare fotografi, rezervari, oferte si administrare, conectata la un ASP.NET Core Web API.
                         </p>
                         <div className="mt-7 flex flex-wrap gap-3">
                             <Link to={PATHS.LOGIN} className="rounded-lg bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-700">

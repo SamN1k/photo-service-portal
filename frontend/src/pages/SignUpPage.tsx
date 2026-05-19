@@ -94,7 +94,7 @@ const SignUpPage = () => {
             <Header />
             <main className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[1fr_460px]">
                 <section>
-                    <p className="text-sm font-semibold uppercase text-teal-700">Cont mock nou</p>
+                    <p className="text-sm font-semibold uppercase text-teal-700">Cont API nou</p>
                     <h1 className="mt-2 text-4xl font-bold text-slate-950">Inregistrare cu rol si sesiune persistenta</h1>
                     <p className="mt-4 max-w-2xl text-slate-600">
                         Conturile noi sunt salvate local, apar in administrare si pot fi folosite imediat pentru demo.
