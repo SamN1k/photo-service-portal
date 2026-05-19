@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string frontendCorsPolicy = "FrontendCorsPolicy";
 
-// Add services
+// Services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -32,11 +32,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(frontendCorsPolicy, policy =>
     {
         policy
-            .WithOrigins(
-    "http://localhost:5173",
-    "https://photo-service-portal-62e62kwgg-samn1ks-projects.vercel.app",
-    "https://defensive-fang-provoke.ngrok-free.dev"
-)
+            .SetIsOriginAllowed(origin =>
+                origin.Contains("localhost") ||
+                origin.Contains("vercel.app") ||
+                origin.Contains("ngrok-free.dev"))
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -45,11 +44,8 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Swagger
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // Middleware
 app.UseCors(frontendCorsPolicy);
@@ -78,7 +74,7 @@ app.Use(async (context, next) =>
 
 app.MapControllers();
 
-// Render Port Configuration
+// Render / Docker / Local support
 var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 
 app.Run($"http://0.0.0.0:{port}");
