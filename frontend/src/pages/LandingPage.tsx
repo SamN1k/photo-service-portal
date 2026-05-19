@@ -10,7 +10,7 @@ const LandingPage = () => {
             <main>
                 <section className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 lg:grid-cols-[1fr_480px] lg:items-center">
                     <div>
-                        <p className="text-sm font-semibold uppercase text-teal-700">Elaborat de Niculita Samuil si Renta Liviu</p>
+                        <p className="text-sm font-semibold text-teal-700">Elaborat de Niculita Samuil si Renta Liviu</p>
                         <h1 className="mt-3 text-5xl font-bold leading-tight text-slate-950">Photo Service Portal</h1>
                         <p className="mt-4 max-w-2xl text-lg text-slate-700">
                             Aplicatie frontend completa pentru cautare fotografi, rezervari, oferte si administrare, folosind servicii mock si date locale.

@@ -63,7 +63,7 @@ export interface OfferInput {
     status: OfferStatus;
 }
 
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+export type BookingStatus = 'pending' | 'confirmed' | 'rejected' | 'paid' | 'finalized';
 
 export interface Booking {
     id: string;

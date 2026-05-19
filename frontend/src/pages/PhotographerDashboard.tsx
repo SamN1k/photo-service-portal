@@ -67,8 +67,9 @@ const offerSortOptions: Array<SelectOption<OfferSort>> = [
 const bookingStatusTone: Record<BookingStatus, 'success' | 'warning' | 'danger' | 'neutral'> = {
     pending: 'warning',
     confirmed: 'success',
-    cancelled: 'danger',
-    completed: 'neutral',
+    rejected: 'danger',
+    paid: 'success',
+    finalized: 'neutral',
 };
 
 const offerStatusTone: Record<OfferStatus, 'success' | 'warning' | 'neutral'> = {
@@ -76,6 +77,10 @@ const offerStatusTone: Record<OfferStatus, 'success' | 'warning' | 'neutral'> = 
     draft: 'warning',
     archived: 'neutral',
 };
+
+const canConfirmBooking = (status: BookingStatus) => status === 'pending';
+const canRejectBooking = (status: BookingStatus) => status === 'pending' || status === 'confirmed';
+const canFinalizeBooking = (status: BookingStatus) => status === 'confirmed' || status === 'paid';
 
 const PhotographerDashboard = () => {
     const { user } = useAuth();
@@ -143,7 +148,7 @@ const PhotographerDashboard = () => {
         const activeOffers = offers.filter((offer) => offer.status === 'active').length;
         const pendingBookings = bookings.filter((booking) => booking.status === 'pending').length;
         const expectedRevenue = bookings
-            .filter((booking) => booking.status === 'confirmed' || booking.status === 'pending')
+            .filter((booking) => booking.status === 'confirmed' || booking.status === 'pending' || booking.status === 'paid')
             .reduce((sum, booking) => sum + booking.budgetEur, 0);
 
         return { activeOffers, pendingBookings, expectedRevenue };
@@ -534,23 +539,23 @@ const PhotographerDashboard = () => {
                                     <button
                                         type="button"
                                         onClick={() => void handleBookingStatus(booking.id, 'confirmed')}
-                                        disabled={booking.status === 'confirmed'}
+                                        disabled={!canConfirmBooking(booking.status)}
                                         className="rounded-lg border border-emerald-300 px-3 py-1 text-xs font-semibold text-emerald-700 disabled:opacity-50"
                                     >
                                         Confirma
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => void handleBookingStatus(booking.id, 'cancelled')}
-                                        disabled={booking.status === 'cancelled'}
+                                        onClick={() => void handleBookingStatus(booking.id, 'rejected')}
+                                        disabled={!canRejectBooking(booking.status)}
                                         className="rounded-lg border border-rose-300 px-3 py-1 text-xs font-semibold text-rose-700 disabled:opacity-50"
                                     >
-                                        Anuleaza
+                                        Respinge
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => void handleBookingStatus(booking.id, 'completed')}
-                                        disabled={booking.status === 'completed'}
+                                        onClick={() => void handleBookingStatus(booking.id, 'finalized')}
+                                        disabled={!canFinalizeBooking(booking.status)}
                                         className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-50"
                                     >
                                         Finalizeaza

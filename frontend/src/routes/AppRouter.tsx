@@ -3,6 +3,7 @@ import AdminPanel from '../pages/AdminPanel';
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
 import Offers from '../pages/Offers';
+import PaymentPage from '../pages/PaymentPage';
 import PhotographerDashboard from '../pages/PhotographerDashboard';
 import SignUpPage from '../pages/SignUpPage';
 import UserDashboard from '../pages/UserDashboard';
@@ -21,7 +22,10 @@ export const router = createBrowserRouter([
         children: [
             {
                 element: <DashboardLayout />,
-                children: [{ path: PATHS.USER_DASHBOARD, element: <UserDashboard /> }],
+                children: [
+                    { path: PATHS.USER_DASHBOARD, element: <UserDashboard /> },
+                    { path: PATHS.USER_PAYMENT, element: <PaymentPage /> },
+                ],
             },
         ],
     },
