@@ -7,18 +7,66 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+coverage/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Local config
 *.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
+Thumbs.db
+
+# VS / Rider / JetBrains
 *.suo
+*.user
+*.userosscache
+*.sln.docstates
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+_ReSharper*/
+*.DotSettings.user
+
+# Vite
+vite.config.ts.timestamp-*
+
+# TypeScript
+*.tsbuildinfo
+
+# Tailwind cache
+.tailwindcache/
+
+# Backend (.NET / C#)
+bin/
+obj/
+publish/
+appsettings.Development.json
+*.db
+*.sqlite
+*.pdb
+
+# ASP.NET secrets
+secrets.json
+
+# Docker
+docker-compose.override.yml
+
+# OS generated files
+ehthumbs.db
+Desktop.ini
