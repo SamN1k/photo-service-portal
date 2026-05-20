@@ -101,7 +101,7 @@ const Offers = () => {
                         <p className="text-sm font-semibold uppercase text-teal-700">Catalog public</p>
                         <h1 className="mt-1 text-4xl font-bold text-slate-950">Oferte foto</h1>
                         <p className="mt-2 max-w-2xl text-slate-600">
-                            Listarea foloseste date mock, cu filtrare, sortare si paginare calculate in service.
+                            Vizualizeaza ofertele disponibile de la maestrii cadrelor.
                         </p>
                     </div>
                     <button type="button" onClick={handleSimulateError} className="rounded-lg border border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-rose-700">
@@ -193,7 +193,7 @@ const Offers = () => {
                                             <div className="mt-5">
                                                 {isAuthenticated && user?.role === 'user' ? (
                                                     <Link
-                                                        to={PATHS.USER_DASHBOARD}
+                                                        to={`${PATHS.USER_DASHBOARD}?offerId=${encodeURIComponent(offer.id)}`}
                                                         className="inline-flex w-full justify-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"
                                                     >
                                                         Rezerva din dashboard

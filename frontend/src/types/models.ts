@@ -61,6 +61,7 @@ export interface OfferInput {
     priceEur: number;
     durationHours: number;
     status: OfferStatus;
+    coverImageUrl?: string;
 }
 
 export type BookingStatus = 'pending' | 'confirmed' | 'rejected' | 'paid' | 'finalized';
