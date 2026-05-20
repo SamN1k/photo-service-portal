@@ -238,6 +238,117 @@ button {
     transform: rotate(-45deg);
 }
 
+.result-offer-button {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 1rem;
+    text-align: left;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.result-offer-button:hover,
+.result-offer-button-active {
+    border-color: #38bdf8;
+    background: #eff6ff;
+    transform: translateY(-1px);
+}
+
+.result-upload-button {
+    display: inline-flex;
+    min-height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #0369a1;
+    padding: 0.65rem 1rem;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 700;
+    transition: background 0.2s ease;
+}
+
+.result-upload-button:hover {
+    background: #075985;
+}
+
+.result-photo-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-soft);
+    padding: 0.75rem;
+}
+
+.result-photo-preview-button {
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    padding: 0;
+    overflow: hidden;
+}
+
+.result-photo-preview-button img {
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.result-photo-preview-button:hover img {
+    transform: scale(1.03);
+    filter: brightness(0.92);
+}
+
+.result-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(2 6 23 / 86%);
+    padding: 1.25rem;
+}
+
+.result-lightbox-content {
+    position: relative;
+    width: min(980px, 100%);
+    text-align: center;
+}
+
+.result-lightbox-image {
+    max-height: min(78vh, 760px);
+    width: 100%;
+    border-radius: 8px;
+    object-fit: contain;
+    background: #020617;
+    box-shadow: 0 24px 70px -24px rgb(0 0 0 / 75%);
+}
+
+.result-lightbox-close {
+    position: absolute;
+    top: -0.9rem;
+    right: -0.9rem;
+    display: inline-flex;
+    width: 2.4rem;
+    height: 2.4rem;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fecdd3;
+    border-radius: 999px;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.result-lightbox-close:hover {
+    background: #b91c1c;
+}
+
 [data-theme='dark'] header,
 [data-theme='dark'] footer,
 [data-theme='dark'] aside {
@@ -302,6 +413,27 @@ button {
 [data-theme='dark'] .payment-method-option-active {
     border-color: #34d399;
     background: #064e3b;
+}
+
+[data-theme='dark'] .bg-sky-50,
+[data-theme='dark'] .bg-sky-100 {
+    background-color: #082f49;
+}
+
+[data-theme='dark'] .border-sky-200 {
+    border-color: #0369a1;
+}
+
+[data-theme='dark'] .text-sky-700,
+[data-theme='dark'] .text-sky-800,
+[data-theme='dark'] .text-sky-900 {
+    color: #bae6fd;
+}
+
+[data-theme='dark'] .result-offer-button:hover,
+[data-theme='dark'] .result-offer-button-active {
+    border-color: #38bdf8;
+    background: #082f49;
 }
 
 [data-theme='dark'] .account-settings-back {
