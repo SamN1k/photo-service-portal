@@ -14,7 +14,7 @@ const Header = () => {
 
     const handleLogout = () => {
         logout();
-        navigate(PATHS.LOGIN);
+        navigate(PATHS.LOGIN, { replace: true });
     };
 
     return (

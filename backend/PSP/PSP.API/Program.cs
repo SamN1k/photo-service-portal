@@ -32,10 +32,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(frontendCorsPolicy, policy =>
     {
         policy
-            .SetIsOriginAllowed(origin =>
-                origin.Contains("localhost") ||
-                origin.Contains("vercel.app") ||
-                origin.Contains("ngrok-free.dev"))
+            .SetIsOriginAllowed(IsAllowedFrontendOrigin)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -74,7 +71,26 @@ app.Use(async (context, next) =>
 
 app.MapControllers();
 
-// Render / Docker / Local support
-var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+// Render / Docker support; local runs keep the launchSettings.json URL.
+var port = Environment.GetEnvironmentVariable("PORT");
 
-app.Run($"http://0.0.0.0:{port}");
+if (string.IsNullOrWhiteSpace(port))
+{
+    app.Run();
+}
+else
+{
+    app.Run($"http://0.0.0.0:{port}");
+}
+
+static bool IsAllowedFrontendOrigin(string origin)
+{
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+    {
+        return false;
+    }
+
+    return uri.IsLoopback ||
+        uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase) ||
+        uri.Host.EndsWith(".ngrok-free.dev", StringComparison.OrdinalIgnoreCase);
+}

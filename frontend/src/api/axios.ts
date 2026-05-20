@@ -56,6 +56,10 @@ const extractValidationMessage = (data?: ApiErrorResponse): string | null => {
 };
 
 const toHttpError = (error: AxiosError<ApiErrorResponse>): MockHttpError => {
+    if (!error.response) {
+        return new MockHttpError(503, 'API-ul nu este disponibil. Verifica daca backend-ul ruleaza pe http://localhost:5280.');
+    }
+
     const status = error.response?.status ?? 500;
     const data = error.response?.data;
     const message = data?.message ?? extractValidationMessage(data) ?? data?.title ?? messageByStatus(status);

@@ -1,10 +1,22 @@
 # Photo Service Portal
 
-Aplicatie demo Frontend realizata in React + TypeScript, fara backend. Datele sunt mock si sunt persistate in `localStorage`.
+Aplicatie demo cu frontend React + TypeScript si backend ASP.NET Core Web API.
 
 ## Rulare
 
+Backend-ul trebuie pornit inainte de autentificare, inregistrare si dashboard-uri.
+
 ```bash
+cd backend/PSP
+dotnet run --project PSP.API/PSP.API.csproj --launch-profile http
+```
+
+API-ul ruleaza local la `http://localhost:5280/api`.
+
+Intr-un terminal separat:
+
+```bash
+cd frontend
 npm install
 npm run dev
 ```
@@ -23,7 +35,8 @@ Toate conturile folosesc parola `demo1234`.
 
 ## Functionalitati
 
-- autentificare simulata si sesiune restaurata din `localStorage`;
+- autentificare si inregistrare prin ASP.NET Core Web API;
+- sesiune restaurata din `localStorage`;
 - rute protejate pentru `user`, `photographer` si `admin`;
 - CRUD cu validari pentru rezervari, oferte si utilizatori;
 - listare cu cautare, filtrare, sortare si paginare gestionate in servicii mock;
