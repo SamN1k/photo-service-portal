@@ -1,4 +1,7 @@
 export type MockHttpStatus = number;
+export const delay = (ms = 300): Promise<void> => new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+});
 
 export class MockHttpError extends Error {
     status: MockHttpStatus;
