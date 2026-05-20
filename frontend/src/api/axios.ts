@@ -11,8 +11,7 @@ interface ApiErrorResponse {
 type GlobalApiErrorHandler = (error: MockHttpError) => void;
 
 const SESSION_KEY = 'photoPortal.session';
-const API_BASE_URL =
-    `${import.meta.env.VITE_API_URL ?? 'http://localhost:5280'}/api`;
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5280/api';
 const USES_NGROK_TUNNEL = (() => {
     try {
         return new URL(API_BASE_URL).hostname.endsWith('.ngrok-free.dev');
