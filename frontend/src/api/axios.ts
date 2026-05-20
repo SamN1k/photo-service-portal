@@ -12,6 +12,13 @@ type GlobalApiErrorHandler = (error: MockHttpError) => void;
 
 const SESSION_KEY = 'photoPortal.session';
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5280/api';
+const USES_NGROK_TUNNEL = (() => {
+    try {
+        return new URL(API_BASE_URL).hostname.endsWith('.ngrok-free.dev');
+    } catch {
+        return false;
+    }
+})();
 
 let globalApiErrorHandler: GlobalApiErrorHandler | null = null;
 
@@ -57,7 +64,7 @@ const extractValidationMessage = (data?: ApiErrorResponse): string | null => {
 
 const toHttpError = (error: AxiosError<ApiErrorResponse>): MockHttpError => {
     if (!error.response) {
-        return new MockHttpError(503, 'API-ul nu este disponibil. Verifica daca backend-ul ruleaza pe http://localhost:5280.');
+        return new MockHttpError(503, `API-ul nu este disponibil. Verifica daca backend-ul ruleaza la ${API_BASE_URL}.`);
     }
 
     const status = error.response?.status ?? 500;
@@ -77,6 +84,10 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    if (USES_NGROK_TUNNEL) {
+        config.headers['ngrok-skip-browser-warning'] = 'true';
     }
 
     return config;
