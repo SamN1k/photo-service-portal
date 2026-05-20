@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import { useAuth } from '../context/useAuth';
-import { authService } from '../services/authService';
+import { authService, type DemoAccount } from '../services/authService';
 import { isMockHttpError } from '../services/mockHttp';
 import { PATHS } from '../routes/paths';
 import type { UserRole } from '../types/models';
@@ -25,11 +25,32 @@ interface LoginErrors {
 const LoginPage = () => {
     const { isAuthenticated, user, login } = useAuth();
     const navigate = useNavigate();
-    const demoAccounts = useMemo(() => authService.getDemoAccounts(), []);
+    const [demoAccounts, setDemoAccounts] = useState<DemoAccount[]>([]);
     const [email, setEmail] = useState('user@demo.local');
     const [password, setPassword] = useState('demo1234');
     const [errors, setErrors] = useState<LoginErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        authService
+            .getDemoAccounts()
+            .then((accounts) => {
+                if (isMounted) {
+                    setDemoAccounts(accounts);
+                }
+            })
+            .catch(() => {
+                if (isMounted) {
+                    setDemoAccounts([]);
+                }
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     if (isAuthenticated && user) {
         return <Navigate to={dashboardPathByRole[user.role]} replace />;
@@ -82,10 +103,10 @@ const LoginPage = () => {
             <Header />
             <main className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[1fr_420px] lg:items-start">
                 <section className="max-w-2xl">
-                    <p className="text-sm font-semibold uppercase text-teal-700">Demo fara backend</p>
-                    <h1 className="mt-2 text-4xl font-bold text-slate-950">Autentificare simulata cu roluri reale in UI</h1>
+                    <p className="text-sm font-semibold uppercase text-teal-700">Demo cu backend ASP.NET</p>
+                    <h1 className="mt-2 text-4xl font-bold text-slate-950">Autentificare API cu roluri reale in UI</h1>
                     <p className="mt-4 text-slate-600">
-                        Login-ul salveaza sesiunea in localStorage, iar accesul la rute si actiuni se schimba dupa rol.
+                        Login-ul foloseste Web API-ul, salveaza sesiunea in localStorage, iar accesul la rute si actiuni se schimba dupa rol.
                     </p>
 
                     <div className="mt-6 grid gap-3 sm:grid-cols-3">

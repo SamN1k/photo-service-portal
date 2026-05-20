@@ -1,44 +1,96 @@
+using PSP.BusinessLayer.Core;
+using PSP.BusinessLayer.Interfaces;
+using PSP.Domain.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+const string frontendCorsPolicy = "FrontendCorsPolicy";
+
+// Services
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Business Logic
+builder.Services.AddSingleton<BusinessLogic>();
+
+builder.Services.AddScoped<IAuthLogic>(
+    provider => provider.GetRequiredService<BusinessLogic>().GetAuthLogic());
+
+builder.Services.AddScoped<IUserLogic>(
+    provider => provider.GetRequiredService<BusinessLogic>().GetUserLogic());
+
+builder.Services.AddScoped<IOfferLogic>(
+    provider => provider.GetRequiredService<BusinessLogic>().GetOfferLogic());
+
+builder.Services.AddScoped<IBookingLogic>(
+    provider => provider.GetRequiredService<BusinessLogic>().GetBookingLogic());
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(frontendCorsPolicy, policy =>
+    {
+        policy
+            .SetIsOriginAllowed(IsAllowedFrontendOrigin)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Swagger
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// Middleware
+app.UseCors(frontendCorsPolicy);
+
+app.UseAuthorization();
+
+// Global Exception Handler
+app.Use(async (context, next) =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    try
+    {
+        await next();
+    }
+    catch (Exception)
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+        await context.Response.WriteAsJsonAsync(
+            new ErrorResponseDto(
+                500,
+                "A aparut o eroare neasteptata pe server."
+            )
+        );
+    }
+});
+
+app.MapControllers();
+
+// Render / Docker support; local runs keep the launchSettings.json URL.
+var port = Environment.GetEnvironmentVariable("PORT");
+
+if (string.IsNullOrWhiteSpace(port))
+{
+    app.Run();
+}
+else
+{
+    app.Run($"http://0.0.0.0:{port}");
 }
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
+static bool IsAllowedFrontendOrigin(string origin)
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast")
-    .WithOpenApi();
+        return false;
+    }
 
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    return uri.IsLoopback ||
+        uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase) ||
+        uri.Host.EndsWith(".ngrok-free.dev", StringComparison.OrdinalIgnoreCase);
 }

@@ -11,7 +11,7 @@ export const AuthGuard = ({ allowedRoles }: AuthGuardProps) => {
     const location = useLocation();
 
     if (!isAuthenticated) {
-        return <Navigate to={PATHS.UNAUTHORIZED} replace state={{ from: location.pathname }} />;
+        return <Navigate to={PATHS.LOGIN} replace state={{ from: location.pathname }} />;
     }
 
     if (allowedRoles && user && !allowedRoles.includes(user.role)) {

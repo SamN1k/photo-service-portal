@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\PSP.Domain\PSP.Domain.csproj"/>
+    </ItemGroup>
+
 </Project>

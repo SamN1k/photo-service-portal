@@ -285,7 +285,7 @@ const PhotographerDashboard = () => {
     };
 
     const handleDelete = async (offerId: string) => {
-        const confirmed = window.confirm('Stergi oferta? Rezervarile existente raman in istoricul mock.');
+        const confirmed = window.confirm('Stergi oferta? Rezervarile existente raman in istoricul API.');
 
         if (!confirmed) {
             return;

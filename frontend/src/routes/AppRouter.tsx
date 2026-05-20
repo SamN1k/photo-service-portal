@@ -89,7 +89,7 @@ export const router = createBrowserRouter([
             <HttpErrorPage
                 statusCode={500}
                 title="Internal Server Error"
-                description="Am simulat o eroare de serviciu mock. Datele raman locale si pot fi reincarcate."
+                description="API-ul a returnat o eroare de serviciu. Datele pot fi reincarcate dupa revenirea serverului."
             />
         ),
     },
