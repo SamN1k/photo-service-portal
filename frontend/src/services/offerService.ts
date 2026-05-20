@@ -20,6 +20,7 @@ export interface OfferListParams {
 }
 
 const createId = () => `offer-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=900&q=80';
 
 const getOffers = (): PhotoOffer[] => {
     const offers = storageService.read<PhotoOffer[]>(OFFERS_KEY, []);
@@ -129,7 +130,7 @@ export const offerService = {
             photographerId,
             photographerName,
             rating: 4.5,
-            coverImageUrl: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=900&q=80',
+            coverImageUrl: input.coverImageUrl || DEFAULT_COVER_IMAGE,
             createdAt: now,
             updatedAt: now,
         };
