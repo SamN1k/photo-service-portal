@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { PATHS } from '../routes/paths';
+import { ThemeToggle } from './ThemeToggle';
 
 const dashboardPathByRole = {
     user: PATHS.USER_DASHBOARD,
@@ -57,6 +58,7 @@ const Header = () => {
                             </Link>
                         </>
                     )}
+                    <ThemeToggle />
                 </nav>
             </div>
         </header>
