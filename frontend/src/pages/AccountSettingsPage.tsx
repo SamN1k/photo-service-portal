@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useAuth } from '../context/useAuth';
 import { PATHS } from '../routes/paths';
@@ -138,7 +139,8 @@ const AccountSettingsPage = () => {
             <section className="soft-panel p-5">
                 <form className="grid gap-5 lg:grid-cols-2" onSubmit={handleSubmit} noValidate>
                     {user && (
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 lg:col-span-2">
+                        <div className="relative rounded-lg border border-slate-200 bg-slate-50 p-4 pr-16 lg:col-span-2">
+                            <ThemeToggle className="absolute right-4 top-4" />
                             <h2 className="text-lg font-bold text-slate-950">Informatii cont</h2>
                             <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-3">
                                 <div>
