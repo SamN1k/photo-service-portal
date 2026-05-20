@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Badge } from '../components/ui/Badge';
@@ -22,6 +22,7 @@ interface OfferFormState {
     priceEur: string;
     durationHours: string;
     status: OfferStatus;
+    coverImageUrl: string;
 }
 
 interface OfferFormErrors {
@@ -40,6 +41,7 @@ const initialForm: OfferFormState = {
     priceEur: '',
     durationHours: '2',
     status: 'active',
+    coverImageUrl: '',
 };
 
 const categoryOptions: Array<SelectOption<OfferCategory>> = [
@@ -67,14 +69,37 @@ const offerSortOptions: Array<SelectOption<OfferSort>> = [
 const bookingStatusTone: Record<BookingStatus, 'success' | 'warning' | 'danger' | 'neutral'> = {
     pending: 'warning',
     confirmed: 'success',
-    cancelled: 'danger',
-    completed: 'neutral',
+    rejected: 'danger',
+    paid: 'success',
+    finalized: 'neutral',
 };
 
 const offerStatusTone: Record<OfferStatus, 'success' | 'warning' | 'neutral'> = {
     active: 'success',
     draft: 'warning',
     archived: 'neutral',
+};
+
+const canConfirmBooking = (status: BookingStatus) => status === 'pending';
+const canRejectBooking = (status: BookingStatus) => status === 'pending' || status === 'confirmed';
+const canFinalizeBooking = (status: BookingStatus) => status === 'confirmed' || status === 'paid';
+
+const readImageAsDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            if (typeof reader.result !== 'string') {
+                reject(new Error('Imaginea nu a putut fi citita.'));
+                return;
+            }
+
+            resolve(reader.result);
+        };
+
+        reader.onerror = () => reject(new Error('Imaginea nu a putut fi citita.'));
+        reader.readAsDataURL(file);
+    });
 };
 
 const PhotographerDashboard = () => {
@@ -143,7 +168,7 @@ const PhotographerDashboard = () => {
         const activeOffers = offers.filter((offer) => offer.status === 'active').length;
         const pendingBookings = bookings.filter((booking) => booking.status === 'pending').length;
         const expectedRevenue = bookings
-            .filter((booking) => booking.status === 'confirmed' || booking.status === 'pending')
+            .filter((booking) => booking.status === 'confirmed' || booking.status === 'pending' || booking.status === 'paid')
             .reduce((sum, booking) => sum + booking.budgetEur, 0);
 
         return { activeOffers, pendingBookings, expectedRevenue };
@@ -197,6 +222,7 @@ const PhotographerDashboard = () => {
             priceEur: Number(form.priceEur),
             durationHours: Number(form.durationHours),
             status: form.status,
+            coverImageUrl: form.coverImageUrl,
         };
 
         setIsSubmitting(true);
@@ -230,8 +256,32 @@ const PhotographerDashboard = () => {
             priceEur: String(offer.priceEur),
             durationHours: String(offer.durationHours),
             status: offer.status,
+            coverImageUrl: offer.coverImageUrl,
         });
         setFormErrors({});
+    };
+
+    const handleCoverImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            toast.error('Alege un fisier imagine pentru oferta.');
+            event.target.value = '';
+            return;
+        }
+
+        try {
+            const coverImageUrl = await readImageAsDataUrl(file);
+            setForm((currentForm) => ({ ...currentForm, coverImageUrl }));
+        } catch {
+            toast.error('Poza ofertei nu a putut fi incarcata.');
+        } finally {
+            event.target.value = '';
+        }
     };
 
     const handleDelete = async (offerId: string) => {
@@ -380,6 +430,27 @@ const PhotographerDashboard = () => {
                             placeholder="Ce include pachetul"
                         />
                         {formErrors.description && <p className="field-error">{formErrors.description}</p>}
+                    </div>
+
+                    <div className="lg:col-span-2">
+                        <label className="mb-2 block text-sm font-semibold text-slate-800" htmlFor="offer-cover-image">
+                            Poza oferta
+                        </label>
+                        <div className="grid gap-4 md:grid-cols-[220px_1fr] md:items-center">
+                            <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                                {form.coverImageUrl ? (
+                                    <img src={form.coverImageUrl} alt="Previzualizare poza oferta" className="h-36 w-full object-cover" />
+                                ) : (
+                                    <div className="flex h-36 items-center justify-center px-4 text-center text-sm font-semibold text-slate-500">
+                                        Alege o poza pentru oferta
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <input id="offer-cover-image" type="file" accept="image/*" onChange={(event) => void handleCoverImageChange(event)} className="form-input" />
+                                <p className="mt-2 text-xs text-slate-500">Poza va fi afisata in catalogul de oferte pentru clienti.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="flex flex-wrap gap-2 lg:col-span-2">
@@ -534,23 +605,23 @@ const PhotographerDashboard = () => {
                                     <button
                                         type="button"
                                         onClick={() => void handleBookingStatus(booking.id, 'confirmed')}
-                                        disabled={booking.status === 'confirmed'}
+                                        disabled={!canConfirmBooking(booking.status)}
                                         className="rounded-lg border border-emerald-300 px-3 py-1 text-xs font-semibold text-emerald-700 disabled:opacity-50"
                                     >
                                         Confirma
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => void handleBookingStatus(booking.id, 'cancelled')}
-                                        disabled={booking.status === 'cancelled'}
+                                        onClick={() => void handleBookingStatus(booking.id, 'rejected')}
+                                        disabled={!canRejectBooking(booking.status)}
                                         className="rounded-lg border border-rose-300 px-3 py-1 text-xs font-semibold text-rose-700 disabled:opacity-50"
                                     >
-                                        Anuleaza
+                                        Respinge
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => void handleBookingStatus(booking.id, 'completed')}
-                                        disabled={booking.status === 'completed'}
+                                        onClick={() => void handleBookingStatus(booking.id, 'finalized')}
+                                        disabled={!canFinalizeBooking(booking.status)}
                                         className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-50"
                                     >
                                         Finalizeaza

@@ -6,6 +6,7 @@ interface NavItem {
     name: string;
     path: string;
     roles: UserRole[];
+    variant?: 'default' | 'result';
 }
 
 const navItems: NavItem[] = [
@@ -13,12 +14,24 @@ const navItems: NavItem[] = [
     { name: 'Ofertele mele', path: PATHS.PHOTOGRAPHER_DASHBOARD, roles: ['photographer'] },
     { name: 'Administrare', path: PATHS.ADMIN_PANEL, roles: ['admin'] },
     { name: 'Catalog oferte', path: PATHS.OFFERS, roles: ['user', 'photographer', 'admin'] },
+    { name: 'Setari cont', path: PATHS.ACCOUNT_SETTINGS, roles: ['user', 'photographer', 'admin'] },
+    { name: 'Vizualizeaza rezultatele', path: PATHS.USER_RESULTS, roles: ['user'], variant: 'result' },
+    { name: 'Incarca rezultate', path: PATHS.PHOTOGRAPHER_RESULTS, roles: ['photographer'], variant: 'result' },
 ];
 
-const linkClassName = ({ isActive }: { isActive: boolean }) =>
-    `rounded-lg px-3 py-2 text-sm font-semibold transition ${
-        isActive ? 'bg-teal-700 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
-    }`;
+const linkClassName = (variant: NavItem['variant'] = 'default') => {
+    return ({ isActive }: { isActive: boolean }) => {
+        if (variant === 'result') {
+            return `rounded-lg border border-sky-200 px-3 py-2 text-sm font-semibold transition ${
+                isActive ? 'bg-sky-600 text-white' : 'bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-900'
+            }`;
+        }
+
+        return `rounded-lg px-3 py-2 text-sm font-semibold transition ${
+            isActive ? 'bg-teal-700 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
+        }`;
+    };
+};
 
 const Sidebar = () => {
     const { user } = useAuth();
@@ -36,7 +49,7 @@ const Sidebar = () => {
 
             <nav className="mt-0 flex gap-2 overflow-x-auto lg:mt-5 lg:flex-col lg:overflow-visible">
                 {visibleItems.map((item) => (
-                    <NavLink key={item.path} to={item.path} className={linkClassName}>
+                    <NavLink key={item.path} to={item.path} className={linkClassName(item.variant)}>
                         {item.name}
                     </NavLink>
                 ))}

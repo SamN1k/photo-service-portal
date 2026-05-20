@@ -22,6 +22,13 @@ export interface UserInput {
     status: UserStatus;
 }
 
+export interface AccountSettingsInput {
+    fullName: string;
+    email: string;
+    currentPassword: string;
+    newPassword?: string;
+}
+
 const createId = (role: UserRole) => `${role}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 const sortUsers = (users: UserRecord[], sortBy: UserSort): UserRecord[] => {
@@ -145,6 +152,46 @@ export const userService = {
 
         saveStoredUsers(nextUsers);
         return toPublicUser(updatedUser);
+    },
+
+    async updateAccountSettings(userId: string, input: AccountSettingsInput): Promise<UserRecord> {
+        await delay();
+
+        const users = getStoredUsers();
+        const normalizedEmail = input.email.trim().toLowerCase();
+        const currentUser = users.find((user) => user.id === userId);
+
+        if (!currentUser) {
+            throw new MockHttpError(404, 'Utilizatorul nu exista.');
+        }
+
+        if (currentUser.password !== input.currentPassword) {
+            throw new MockHttpError(401, 'Parola curenta nu este corecta.');
+        }
+
+        const emailUsed = users.some((user) => user.id !== userId && user.email.toLowerCase() === normalizedEmail);
+
+        if (emailUsed) {
+            throw new MockHttpError(409, 'Emailul este deja folosit de alt utilizator.');
+        }
+
+        let updatedUser: StoredUser | null = null;
+        const nextUsers = users.map((user) => {
+            if (user.id !== userId) {
+                return user;
+            }
+
+            updatedUser = {
+                ...user,
+                fullName: input.fullName.trim(),
+                email: normalizedEmail,
+                password: input.newPassword?.trim() ? input.newPassword.trim() : user.password,
+            };
+            return updatedUser;
+        });
+
+        saveStoredUsers(nextUsers);
+        return toPublicUser(updatedUser ?? currentUser);
     },
 
     async deleteUser(userId: string): Promise<void> {

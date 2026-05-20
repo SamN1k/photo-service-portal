@@ -1,11 +1,15 @@
 import { createBrowserRouter } from 'react-router-dom';
+import AccountSettingsPage from '../pages/AccountSettingsPage';
 import AdminPanel from '../pages/AdminPanel';
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
 import Offers from '../pages/Offers';
+import PaymentPage from '../pages/PaymentPage';
 import PhotographerDashboard from '../pages/PhotographerDashboard';
+import PhotographerResultsPage from '../pages/PhotographerResultsPage';
 import SignUpPage from '../pages/SignUpPage';
 import UserDashboard from '../pages/UserDashboard';
+import UserResultsPage from '../pages/UserResultsPage';
 import HttpErrorPage from '../pages/errors/HttpErrorPage';
 import { AuthGuard } from '../guards/AuthGuard';
 import { DashboardLayout } from '../layouts/DashboardLayout';
@@ -21,7 +25,20 @@ export const router = createBrowserRouter([
         children: [
             {
                 element: <DashboardLayout />,
-                children: [{ path: PATHS.USER_DASHBOARD, element: <UserDashboard /> }],
+                children: [
+                    { path: PATHS.USER_DASHBOARD, element: <UserDashboard /> },
+                    { path: PATHS.USER_PAYMENT, element: <PaymentPage /> },
+                    { path: PATHS.USER_RESULTS, element: <UserResultsPage /> },
+                ],
+            },
+        ],
+    },
+    {
+        element: <AuthGuard allowedRoles={['user', 'photographer', 'admin']} />,
+        children: [
+            {
+                element: <DashboardLayout />,
+                children: [{ path: PATHS.ACCOUNT_SETTINGS, element: <AccountSettingsPage /> }],
             },
         ],
     },
@@ -30,7 +47,10 @@ export const router = createBrowserRouter([
         children: [
             {
                 element: <DashboardLayout />,
-                children: [{ path: PATHS.PHOTOGRAPHER_DASHBOARD, element: <PhotographerDashboard /> }],
+                children: [
+                    { path: PATHS.PHOTOGRAPHER_DASHBOARD, element: <PhotographerDashboard /> },
+                    { path: PATHS.PHOTOGRAPHER_RESULTS, element: <PhotographerResultsPage /> },
+                ],
             },
         ],
     },

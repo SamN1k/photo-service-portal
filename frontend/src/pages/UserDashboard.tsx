@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Badge } from '../components/ui/Badge';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -41,8 +41,9 @@ const statusOptions: Array<SelectOption<'all' | BookingStatus>> = [
     { value: 'all', label: 'Toate statusurile' },
     { value: 'pending', label: 'In asteptare' },
     { value: 'confirmed', label: 'Confirmate' },
-    { value: 'cancelled', label: 'Anulate' },
-    { value: 'completed', label: 'Finalizate' },
+    { value: 'rejected', label: 'Respinse' },
+    { value: 'paid', label: 'Achitate' },
+    { value: 'finalized', label: 'Finalizate' },
 ];
 
 const sortOptions: Array<SelectOption<BookingSort>> = [
@@ -55,13 +56,18 @@ const sortOptions: Array<SelectOption<BookingSort>> = [
 const statusTone: Record<BookingStatus, 'success' | 'warning' | 'danger' | 'neutral'> = {
     pending: 'warning',
     confirmed: 'success',
-    cancelled: 'danger',
-    completed: 'neutral',
+    rejected: 'danger',
+    paid: 'success',
+    finalized: 'neutral',
 };
+
+const canPayBooking = (status: BookingStatus) => !['rejected', 'paid', 'finalized'].includes(status);
 
 const UserDashboard = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const requestedOfferId = searchParams.get('offerId');
     const [offers, setOffers] = useState<PhotoOffer[]>([]);
     const [result, setResult] = useState<PaginatedResult<Booking> | null>(null);
     const [query, setQuery] = useState('');
@@ -99,8 +105,22 @@ const UserDashboard = () => {
             setResult(bookingsResult);
             setOffers(offersResult.items);
 
-            if (offersResult.items[0]) {
-                setForm((currentForm) => (currentForm.offerId ? currentForm : { ...currentForm, offerId: offersResult.items[0].id }));
+            const requestedOffer = requestedOfferId ? offersResult.items.find((offer) => offer.id === requestedOfferId) : null;
+            const defaultOffer = requestedOffer ?? offersResult.items[0];
+
+            if (defaultOffer) {
+                setForm((currentForm) => {
+                    if (requestedOffer && currentForm.offerId !== requestedOffer.id) {
+                        return {
+                            ...currentForm,
+                            offerId: requestedOffer.id,
+                            location: currentForm.location || requestedOffer.location,
+                            budgetEur: currentForm.budgetEur || String(requestedOffer.priceEur),
+                        };
+                    }
+
+                    return currentForm.offerId ? currentForm : { ...currentForm, offerId: defaultOffer.id };
+                });
             }
         } catch (loadError) {
             const message = isMockHttpError(loadError) ? loadError.message : 'Rezervarile nu au putut fi incarcate.';
@@ -112,7 +132,7 @@ const UserDashboard = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [navigate, page, query, sortBy, status, user]);
+    }, [navigate, page, query, requestedOfferId, sortBy, status, user]);
 
     useEffect(() => {
         void loadData();
@@ -126,6 +146,8 @@ const UserDashboard = () => {
 
         return { confirmed, pending, totalBudget };
     }, [result]);
+
+    const selectedOfferForForm = useMemo(() => offers.find((offer) => offer.id === form.offerId) ?? null, [form.offerId, offers]);
 
     const validateForm = () => {
         const nextErrors: BookingFormErrors = {};
@@ -254,7 +276,16 @@ const UserDashboard = () => {
                         <select
                             id="booking-offer"
                             value={form.offerId}
-                            onChange={(event) => setForm((currentForm) => ({ ...currentForm, offerId: event.target.value }))}
+                            onChange={(event) => {
+                                const nextOffer = offers.find((offer) => offer.id === event.target.value);
+
+                                setForm((currentForm) => ({
+                                    ...currentForm,
+                                    offerId: event.target.value,
+                                    location: nextOffer?.location ?? currentForm.location,
+                                    budgetEur: nextOffer ? String(nextOffer.priceEur) : currentForm.budgetEur,
+                                }));
+                            }}
                             className="form-input"
                         >
                             <option value="">Alege oferta</option>
@@ -324,6 +355,15 @@ const UserDashboard = () => {
                             placeholder="Detalii despre eveniment"
                         />
                     </div>
+
+                    {selectedOfferForForm && (
+                        <div className="rounded-lg border border-teal-200 bg-teal-50 p-4 text-sm lg:col-span-2">
+                            <p className="font-semibold text-teal-900">Oferta selectata din catalog</p>
+                            <p className="mt-1 text-teal-800">
+                                {selectedOfferForForm.title} · {selectedOfferForForm.photographerName} · {formatCurrency(selectedOfferForForm.priceEur)}
+                            </p>
+                        </div>
+                    )}
 
                     <div className="flex flex-wrap gap-2 lg:col-span-2">
                         <button
@@ -407,7 +447,15 @@ const UserDashboard = () => {
                                         <Badge tone={statusTone[booking.status]}>{booking.status}</Badge>
                                     </td>
                                     <td className="py-3">
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-wrap gap-2">
+                                            {canPayBooking(booking.status) && (
+                                                <Link
+                                                    to={PATHS.USER_PAYMENT.replace(':bookingId', booking.id)}
+                                                    className="payment-outline-button rounded-lg border border-emerald-500 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 transition-colors"
+                                                >
+                                                    Mergi spre achitare
+                                                </Link>
+                                            )}
                                             <button
                                                 type="button"
                                                 onClick={() => handleEdit(booking)}
