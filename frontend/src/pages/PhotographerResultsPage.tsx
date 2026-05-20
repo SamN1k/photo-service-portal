@@ -36,6 +36,7 @@ const PhotographerResultsPage = () => {
     const [results, setResults] = useState<BookingResult[]>([]);
     const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
     const [selectedPhoto, setSelectedPhoto] = useState<ResultPhoto | null>(null);
+    const [photoPendingDelete, setPhotoPendingDelete] = useState<ResultPhoto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -113,17 +114,18 @@ const PhotographerResultsPage = () => {
         }
     };
 
-    const handleRemovePhoto = async (photoId: string) => {
+    const handleRemovePhoto = async () => {
         if (!selectedBooking || !selectedResult) {
             return;
         }
 
         const updatedResult = await resultService.saveResultPhotos(
             selectedBooking.id,
-            selectedResult.photos.filter((photo) => photo.id !== photoId),
+            selectedResult.photos.filter((photo) => photo.id !== photoPendingDelete?.id),
         );
 
         setResults((currentResults) => currentResults.map((result) => (result.bookingId === updatedResult.bookingId ? updatedResult : result)));
+        setPhotoPendingDelete(null);
         toast.success('Galeria a fost actualizata.');
     };
 
@@ -216,7 +218,7 @@ const PhotographerResultsPage = () => {
                                                 <span className="truncate">{photo.name}</span>
                                                 <button
                                                     type="button"
-                                                    onClick={() => void handleRemovePhoto(photo.id)}
+                                                    onClick={() => setPhotoPendingDelete(photo)}
                                                     className="rounded-md border border-rose-300 px-2 py-1 font-semibold text-rose-700 hover:bg-rose-50"
                                                 >
                                                     Sterge
@@ -233,6 +235,32 @@ const PhotographerResultsPage = () => {
                         </article>
                     )}
                 </section>
+            )}
+            {photoPendingDelete && (
+                <div className="result-confirm-modal" role="dialog" aria-modal="true" aria-label="Confirma stergerea pozei">
+                    <div className="result-confirm-card">
+                        <h2 className="text-xl font-bold text-slate-950">Stergi poza?</h2>
+                        <p className="mt-2 text-sm text-slate-600">
+                            Confirma stergerea pozei <span className="font-semibold text-slate-950">{photoPendingDelete.name}</span> din galeria clientului.
+                        </p>
+                        <div className="mt-5 flex flex-wrap justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setPhotoPendingDelete(null)}
+                                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                            >
+                                Anuleaza
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => void handleRemovePhoto()}
+                                className="rounded-lg bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800"
+                            >
+                                Confirma stergerea
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
             <ResultPhotoLightbox photo={selectedPhoto} onClose={() => setSelectedPhoto(null)} />
         </div>
