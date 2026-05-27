@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
-using PSP.DataAccessLayer;
+using PSP.DataAccessLayer.Context;
 using PSP.Domain.Models;
 
 var builder = WebApplication.CreateBuilder(args);
