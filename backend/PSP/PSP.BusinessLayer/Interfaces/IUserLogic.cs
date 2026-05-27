@@ -7,5 +7,6 @@ public interface IUserLogic
     PaginatedResultDto<UserDto> ListUsers(UserListQueryDto query);
     UserDto CreateUser(UserInputDto input);
     UserDto UpdateUser(string userId, UserInputDto input);
+    UserDto UpdateAccountSettings(string userId, AccountSettingsInputDto input);
     void DeleteUser(string userId);
 }

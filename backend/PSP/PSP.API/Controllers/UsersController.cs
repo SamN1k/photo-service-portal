@@ -48,6 +48,19 @@ public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
         }
     }
 
+    [HttpPut("{userId}/settings")]
+    public ActionResult<UserDto> UpdateAccountSettings(string userId, [FromBody] AccountSettingsInputDto input)
+    {
+        try
+        {
+            return Ok(userLogic.UpdateAccountSettings(userId, input));
+        }
+        catch (BusinessException exception)
+        {
+            return FromBusinessException(exception);
+        }
+    }
+
     [HttpDelete("{userId}")]
     public IActionResult DeleteUser(string userId)
     {

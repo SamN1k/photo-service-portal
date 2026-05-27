@@ -10,8 +10,9 @@ public class BookingAction(InMemoryDataStore store)
     {
         "pending",
         "confirmed",
-        "cancelled",
-        "completed"
+        "rejected",
+        "paid",
+        "finalized"
     };
 
     public PaginatedResultDto<BookingDto> ListBookings(BookingListQueryDto query)
@@ -49,6 +50,15 @@ public class BookingAction(InMemoryDataStore store)
 
             bookings = SortBookings(bookings, query.SortBy ?? "eventDateAsc");
             return Pagination.From(bookings.Select(DtoMapper.ToDto).ToList(), query.Page, query.PageSize);
+        }
+    }
+
+    public BookingDto GetBooking(string bookingId)
+    {
+        lock (store.SyncRoot)
+        {
+            var booking = FindBooking(bookingId);
+            return DtoMapper.ToDto(booking);
         }
     }
 

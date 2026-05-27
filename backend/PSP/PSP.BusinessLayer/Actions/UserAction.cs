@@ -119,6 +119,48 @@ public class UserAction(InMemoryDataStore store)
         }
     }
 
+    public UserDto UpdateAccountSettings(string userId, AccountSettingsInputDto input)
+    {
+        var fullName = NormalizeRequired(input.FullName, "Numele utilizatorului este obligatoriu.");
+        var email = NormalizeEmail(input.Email);
+        var currentPassword = NormalizeRequired(input.CurrentPassword, "Parola curenta este obligatorie.");
+        var newPassword = input.NewPassword?.Trim();
+
+        if (!string.IsNullOrWhiteSpace(newPassword) && newPassword.Length < 6)
+        {
+            throw new BusinessException(422, "Parola noua trebuie sa aiba minimum 6 caractere.");
+        }
+
+        lock (store.SyncRoot)
+        {
+            var user = store.Users.FirstOrDefault(candidate => candidate.Id == userId)
+                ?? throw new BusinessException(404, "Utilizatorul nu exista.");
+
+            if (user.Password != currentPassword)
+            {
+                throw new BusinessException(403, "Parola curenta este invalida.");
+            }
+
+            var emailIsUsed = store.Users.Any(candidate =>
+                candidate.Id != userId && string.Equals(candidate.Email, email, StringComparison.OrdinalIgnoreCase));
+
+            if (emailIsUsed)
+            {
+                throw new BusinessException(409, "Emailul este deja folosit de alt utilizator.");
+            }
+
+            user.FullName = fullName;
+            user.Email = email;
+
+            if (!string.IsNullOrWhiteSpace(newPassword))
+            {
+                user.Password = newPassword;
+            }
+
+            return DtoMapper.ToDto(user);
+        }
+    }
+
     public void DeleteUser(string userId)
     {
         lock (store.SyncRoot)

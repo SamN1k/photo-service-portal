@@ -84,7 +84,8 @@ public class OfferAction(InMemoryDataStore store)
             input.Location,
             input.PriceEur,
             input.DurationHours,
-            input.Status));
+            input.Status,
+            input.CoverImageUrl));
         var photographerId = NormalizeRequired(input.PhotographerId, "Fotograful este obligatoriu.");
         var photographerName = NormalizeRequired(input.PhotographerName, "Numele fotografului este obligatoriu.");
         var now = DateTimeOffset.UtcNow;
@@ -107,7 +108,7 @@ public class OfferAction(InMemoryDataStore store)
                 PhotographerName = string.IsNullOrWhiteSpace(photographer.FullName) ? photographerName : photographer.FullName,
                 Status = normalizedInput.Status,
                 Rating = 4.5m,
-                CoverImageUrl = DefaultCoverImageUrl,
+                CoverImageUrl = NormalizeCoverImageUrl(normalizedInput.CoverImageUrl, DefaultCoverImageUrl),
                 CreatedAt = now,
                 UpdatedAt = now
             };
@@ -131,6 +132,7 @@ public class OfferAction(InMemoryDataStore store)
             offer.PriceEur = normalizedInput.PriceEur;
             offer.DurationHours = normalizedInput.DurationHours;
             offer.Status = normalizedInput.Status;
+            offer.CoverImageUrl = NormalizeCoverImageUrl(normalizedInput.CoverImageUrl, offer.CoverImageUrl);
             offer.UpdatedAt = DateTimeOffset.UtcNow;
 
             return DtoMapper.ToDto(offer);
@@ -182,7 +184,9 @@ public class OfferAction(InMemoryDataStore store)
             throw new BusinessException(422, "Durata ofertei trebuie sa fie pozitiva.");
         }
 
-        return new OfferInputDto(title, description, category, location, input.PriceEur, input.DurationHours, status);
+        var coverImageUrl = input.CoverImageUrl?.Trim();
+
+        return new OfferInputDto(title, description, category, location, input.PriceEur, input.DurationHours, status, coverImageUrl);
     }
 
     private static bool IsAll(string value)
@@ -210,5 +214,10 @@ public class OfferAction(InMemoryDataStore store)
         }
 
         return value.Trim();
+    }
+
+    private static string NormalizeCoverImageUrl(string? coverImageUrl, string fallback)
+    {
+        return string.IsNullOrWhiteSpace(coverImageUrl) ? fallback : coverImageUrl.Trim();
     }
 }

@@ -18,6 +18,12 @@ public sealed record UserInputDto(
     string Role,
     string Status);
 
+public sealed record AccountSettingsInputDto(
+    string FullName,
+    string Email,
+    string CurrentPassword,
+    string? NewPassword);
+
 public sealed class UserListQueryDto
 {
     public string? Query { get; set; }

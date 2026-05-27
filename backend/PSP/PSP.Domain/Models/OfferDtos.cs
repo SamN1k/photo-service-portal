@@ -23,7 +23,8 @@ public sealed record OfferInputDto(
     string Location,
     decimal PriceEur,
     int DurationHours,
-    string Status);
+    string Status,
+    string? CoverImageUrl = null);
 
 public sealed record CreateOfferDto(
     string Title,
@@ -34,7 +35,8 @@ public sealed record CreateOfferDto(
     int DurationHours,
     string Status,
     string PhotographerId,
-    string PhotographerName);
+    string PhotographerName,
+    string? CoverImageUrl = null);
 
 public sealed class OfferListQueryDto
 {

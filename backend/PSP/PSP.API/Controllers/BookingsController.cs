@@ -21,6 +21,19 @@ public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControll
         }
     }
 
+    [HttpGet("{bookingId}")]
+    public ActionResult<BookingDto> GetBooking(string bookingId)
+    {
+        try
+        {
+            return Ok(bookingLogic.GetBooking(bookingId));
+        }
+        catch (BusinessException exception)
+        {
+            return FromBusinessException(exception);
+        }
+    }
+
     [HttpPost]
     public ActionResult<BookingDto> CreateBooking([FromBody] CreateBookingDto input)
     {

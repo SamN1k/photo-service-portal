@@ -217,8 +217,8 @@ public sealed class InMemoryDataStore
             new BookingEntity
             {
                 Id = "booking-003",
-                ClientId = "user-002",
-                ClientName = "Victor Mihai",
+                ClientId = "user-001",
+                ClientName = "Maria Popescu",
                 OfferId = "offer-004",
                 OfferTitle = "Botez si familie",
                 PhotographerId = "photo-002",
@@ -227,7 +227,7 @@ public sealed class InMemoryDataStore
                 Location = "Iasi",
                 BudgetEur = 360,
                 Notes = "Eveniment mic, aproximativ 30 invitati.",
-                Status = "cancelled",
+                Status = "rejected",
                 CreatedAt = Utc("2026-04-19T17:00:00.000Z"),
                 UpdatedAt = Utc("2026-04-23T17:00:00.000Z")
             }
