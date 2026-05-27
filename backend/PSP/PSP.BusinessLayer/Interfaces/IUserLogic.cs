@@ -4,9 +4,9 @@ namespace PSP.BusinessLayer.Interfaces;
 
 public interface IUserLogic
 {
-    PaginatedResultDto<UserDto> ListUsers(UserListQueryDto query);
-    UserDto CreateUser(UserInputDto input);
-    UserDto UpdateUser(string userId, UserInputDto input);
-    UserDto UpdateAccountSettings(string userId, AccountSettingsInputDto input);
-    void DeleteUser(string userId);
+    Task<PaginatedResultDto<UserDto>> ListUsersAsync(UserListQueryDto query);
+    Task<UserDto> CreateUserAsync(UserInputDto input);
+    Task<UserDto> UpdateUserAsync(string userId, UserInputDto input);
+    Task<UserDto> UpdateAccountSettingsAsync(string userId, AccountSettingsInputDto input);
+    Task DeleteUserAsync(string userId);
 }

@@ -1,29 +1,28 @@
 using PSP.BusinessLayer.Actions;
 using PSP.BusinessLayer.Interfaces;
+using PSP.DataAccessLayer;
 
 namespace PSP.BusinessLayer.Core;
 
-public sealed class BusinessLogic
+public sealed class BusinessLogic(PhotoPortalDbContext db)
 {
-    private readonly InMemoryDataStore _store = new();
-
     public IUserLogic GetUserLogic()
     {
-        return new UserLogic(_store);
+        return new UserLogic(db);
     }
 
     public IOfferLogic GetOfferLogic()
     {
-        return new OfferLogic(_store);
+        return new OfferLogic(db);
     }
 
     public IBookingLogic GetBookingLogic()
     {
-        return new BookingLogic(_store);
+        return new BookingLogic(db);
     }
 
     public IAuthLogic GetAuthLogic()
     {
-        return new AuthLogic(_store);
+        return new AuthLogic(db);
     }
 }

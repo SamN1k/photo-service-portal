@@ -1,6 +1,7 @@
 using PSP.BusinessLayer.Actions;
 using PSP.BusinessLayer.Interfaces;
+using PSP.DataAccessLayer;
 
 namespace PSP.BusinessLayer.Core;
 
-public sealed class BookingLogic(InMemoryDataStore store) : BookingAction(store), IBookingLogic;
+public sealed class BookingLogic(PhotoPortalDbContext db) : BookingAction(db), IBookingLogic;

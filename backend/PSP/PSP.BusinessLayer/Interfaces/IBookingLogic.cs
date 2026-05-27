@@ -4,10 +4,10 @@ namespace PSP.BusinessLayer.Interfaces;
 
 public interface IBookingLogic
 {
-    PaginatedResultDto<BookingDto> ListBookings(BookingListQueryDto query);
-    BookingDto GetBooking(string bookingId);
-    BookingDto CreateBooking(CreateBookingDto input);
-    BookingDto UpdateBooking(string bookingId, BookingInputDto input);
-    BookingDto UpdateBookingStatus(string bookingId, UpdateBookingStatusDto input);
-    void DeleteBooking(string bookingId);
+    Task<PaginatedResultDto<BookingDto>> ListBookingsAsync(BookingListQueryDto query);
+    Task<BookingDto> GetBookingAsync(string bookingId);
+    Task<BookingDto> CreateBookingAsync(CreateBookingDto input);
+    Task<BookingDto> UpdateBookingAsync(string bookingId, BookingInputDto input);
+    Task<BookingDto> UpdateBookingStatusAsync(string bookingId, UpdateBookingStatusDto input);
+    Task DeleteBookingAsync(string bookingId);
 }

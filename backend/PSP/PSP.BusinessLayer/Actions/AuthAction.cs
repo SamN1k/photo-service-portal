@@ -1,10 +1,12 @@
+using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
-using PSP.Domain.Models;
+using PSP.DataAccessLayer;
 using PSP.Domain.Entities;
+using PSP.Domain.Models;
 
 namespace PSP.BusinessLayer.Actions;
 
-public class AuthAction(InMemoryDataStore store)
+public class AuthAction(PhotoPortalDbContext db)
 {
     private static readonly HashSet<string> Roles = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -13,73 +15,69 @@ public class AuthAction(InMemoryDataStore store)
         "admin"
     };
 
-    public AuthSessionDto Login(LoginCredentialsDto credentials)
+    public async Task<AuthSessionDto> LoginAsync(LoginCredentialsDto credentials)
     {
         var email = NormalizeRequired(credentials.Email, "Emailul este obligatoriu.").ToLowerInvariant();
         var password = NormalizeRequired(credentials.Password, "Parola este obligatorie.");
+        var user = await db.Users.FirstOrDefaultAsync(candidate => candidate.Email == email);
 
-        lock (store.SyncRoot)
+        if (user is null || user.Password != password)
         {
-            var user = store.Users.FirstOrDefault(candidate => string.Equals(candidate.Email, email, StringComparison.OrdinalIgnoreCase));
-
-            if (user is null || user.Password != password)
-            {
-                throw new BusinessException(401, "Email sau parola invalida.");
-            }
-
-            if (user.Status == "suspended")
-            {
-                throw new BusinessException(403, "Contul este suspendat.");
-            }
-
-            user.LastLogin = DateTimeOffset.UtcNow;
-            return CreateSession(user);
+            throw new BusinessException(401, "Email sau parola invalida.");
         }
+
+        if (user.Status == "suspended")
+        {
+            throw new BusinessException(403, "Contul este suspendat.");
+        }
+
+        user.LastLogin = DateTimeOffset.UtcNow;
+        await db.SaveChangesAsync();
+
+        return CreateSession(user);
     }
 
-    public AuthSessionDto SignUp(SignUpPayloadDto payload)
+    public async Task<AuthSessionDto> SignUpAsync(SignUpPayloadDto payload)
     {
         var fullName = NormalizeRequired(payload.FullName, "Numele este obligatoriu.");
         var email = NormalizeRequired(payload.Email, "Emailul este obligatoriu.").ToLowerInvariant();
         var password = NormalizeRequired(payload.Password, "Parola este obligatorie.");
         var role = NormalizeRole(payload.Role);
 
-        lock (store.SyncRoot)
+        if (await db.Users.AnyAsync(user => user.Email == email))
         {
-            if (store.Users.Any(user => string.Equals(user.Email, email, StringComparison.OrdinalIgnoreCase)))
-            {
-                throw new BusinessException(409, "Exista deja un cont cu acest email.");
-            }
-
-            var user = new UserEntity
-            {
-                Id = $"{role}-{Guid.NewGuid():N}"[..18],
-                FullName = fullName,
-                Email = email,
-                Password = password,
-                Role = role,
-                Status = role == "photographer" ? "pending" : "active",
-                CreatedAt = DateTimeOffset.UtcNow,
-                TotalBookings = 0,
-                RevenueEur = 0,
-                LastLogin = DateTimeOffset.UtcNow
-            };
-
-            store.Users.Insert(0, user);
-            return CreateSession(user);
+            throw new BusinessException(409, "Exista deja un cont cu acest email.");
         }
+
+        var user = new UserEntity
+        {
+            Id = $"{role}-{Guid.NewGuid():N}"[..18],
+            FullName = fullName,
+            Email = email,
+            Password = password,
+            Role = role,
+            Status = role == "photographer" ? "pending" : "active",
+            CreatedAt = DateTimeOffset.UtcNow,
+            TotalBookings = 0,
+            RevenueEur = 0,
+            LastLogin = DateTimeOffset.UtcNow
+        };
+
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+
+        return CreateSession(user);
     }
 
-    public IReadOnlyList<DemoAccountDto> GetDemoAccounts()
+    public async Task<IReadOnlyList<DemoAccountDto>> GetDemoAccountsAsync()
     {
-        lock (store.SyncRoot)
-        {
-            return store.Users
-                .Where(user => user.Status == "active")
-                .Take(3)
-                .Select(user => new DemoAccountDto(user.Email, user.Password, user.Role, user.FullName))
-                .ToList();
-        }
+        return await db.Users
+            .AsNoTracking()
+            .Where(user => user.Status == "active")
+            .OrderBy(user => user.CreatedAt)
+            .Take(3)
+            .Select(user => new DemoAccountDto(user.Email, user.Password, user.Role, user.FullName))
+            .ToListAsync();
     }
 
     private static AuthSessionDto CreateSession(UserEntity user)
@@ -90,7 +88,7 @@ public class AuthAction(InMemoryDataStore store)
             DateTimeOffset.UtcNow);
     }
 
-    private static string NormalizeRole(string value)
+    private static string NormalizeRole(string? value)
     {
         var normalized = NormalizeRequired(value, "Rolul este obligatoriu.").ToLowerInvariant();
 
@@ -102,7 +100,7 @@ public class AuthAction(InMemoryDataStore store)
         return normalized;
     }
 
-    private static string NormalizeRequired(string value, string errorMessage)
+    private static string NormalizeRequired(string? value, string errorMessage)
     {
         if (string.IsNullOrWhiteSpace(value))
         {

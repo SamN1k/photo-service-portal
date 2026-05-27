@@ -1,17 +1,24 @@
 using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using PSP.Domain.Entities;
 
-namespace PSP.BusinessLayer.Actions;
+namespace PSP.DataAccessLayer;
 
-public sealed class InMemoryDataStore
+public static class DatabaseSeeder
 {
-    public object SyncRoot { get; } = new();
+    public static async Task SeedAsync(PhotoPortalDbContext context)
+    {
+        if (await context.Users.AnyAsync())
+        {
+            return;
+        }
 
-    public List<UserEntity> Users { get; } = SeedUsers();
+        context.Users.AddRange(SeedUsers());
+        context.Offers.AddRange(SeedOffers());
+        context.Bookings.AddRange(SeedBookings());
 
-    public List<PhotoOfferEntity> Offers { get; } = SeedOffers();
-
-    public List<BookingEntity> Bookings { get; } = SeedBookings();
+        await context.SaveChangesAsync();
+    }
 
     private static List<UserEntity> SeedUsers()
     {

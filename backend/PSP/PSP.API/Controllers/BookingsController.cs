@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
 using PSP.Domain.Models;
@@ -9,82 +10,106 @@ namespace PSP.API.Controllers;
 public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControllerBase
 {
     [HttpGet]
-    public ActionResult<PaginatedResultDto<BookingDto>> ListBookings([FromQuery] BookingListQueryDto query)
+    public async Task<ActionResult<PaginatedResultDto<BookingDto>>> ListBookings([FromQuery] BookingListQueryDto query)
     {
         try
         {
-            return Ok(bookingLogic.ListBookings(query));
+            return Ok(await bookingLogic.ListBookingsAsync(query));
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
+        }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
         }
     }
 
     [HttpGet("{bookingId}")]
-    public ActionResult<BookingDto> GetBooking(string bookingId)
+    public async Task<ActionResult<BookingDto>> GetBooking(string bookingId)
     {
         try
         {
-            return Ok(bookingLogic.GetBooking(bookingId));
+            return Ok(await bookingLogic.GetBookingAsync(bookingId));
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
         }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
     }
 
     [HttpPost]
-    public ActionResult<BookingDto> CreateBooking([FromBody] CreateBookingDto input)
+    public async Task<ActionResult<BookingDto>> CreateBooking([FromBody] CreateBookingDto input)
     {
         try
         {
-            var booking = bookingLogic.CreateBooking(input);
+            var booking = await bookingLogic.CreateBookingAsync(input);
             return Created($"/api/bookings/{booking.Id}", booking);
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
         }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
     }
 
     [HttpPut("{bookingId}")]
-    public ActionResult<BookingDto> UpdateBooking(string bookingId, [FromBody] BookingInputDto input)
+    public async Task<ActionResult<BookingDto>> UpdateBooking(string bookingId, [FromBody] BookingInputDto input)
     {
         try
         {
-            return Ok(bookingLogic.UpdateBooking(bookingId, input));
+            return Ok(await bookingLogic.UpdateBookingAsync(bookingId, input));
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
+        }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
         }
     }
 
     [HttpPatch("{bookingId}/status")]
-    public ActionResult<BookingDto> UpdateBookingStatus(string bookingId, [FromBody] UpdateBookingStatusDto input)
+    public async Task<ActionResult<BookingDto>> UpdateBookingStatus(string bookingId, [FromBody] UpdateBookingStatusDto input)
     {
         try
         {
-            return Ok(bookingLogic.UpdateBookingStatus(bookingId, input));
+            return Ok(await bookingLogic.UpdateBookingStatusAsync(bookingId, input));
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
         }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
     }
 
     [HttpDelete("{bookingId}")]
-    public IActionResult DeleteBooking(string bookingId)
+    public async Task<IActionResult> DeleteBooking(string bookingId)
     {
         try
         {
-            bookingLogic.DeleteBooking(bookingId);
+            await bookingLogic.DeleteBookingAsync(bookingId);
             return NoContent();
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
+        }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
         }
     }
 }

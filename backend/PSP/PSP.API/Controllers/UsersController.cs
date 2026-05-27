@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
 using PSP.Domain.Models;
@@ -9,69 +10,89 @@ namespace PSP.API.Controllers;
 public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
 {
     [HttpGet]
-    public ActionResult<PaginatedResultDto<UserDto>> ListUsers([FromQuery] UserListQueryDto query)
+    public async Task<ActionResult<PaginatedResultDto<UserDto>>> ListUsers([FromQuery] UserListQueryDto query)
     {
         try
         {
-            return Ok(userLogic.ListUsers(query));
+            return Ok(await userLogic.ListUsersAsync(query));
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
         }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
     }
 
     [HttpPost]
-    public ActionResult<UserDto> CreateUser([FromBody] UserInputDto input)
+    public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserInputDto input)
     {
         try
         {
-            var user = userLogic.CreateUser(input);
+            var user = await userLogic.CreateUserAsync(input);
             return Created($"/api/users/{user.Id}", user);
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
         }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
     }
 
     [HttpPut("{userId}")]
-    public ActionResult<UserDto> UpdateUser(string userId, [FromBody] UserInputDto input)
+    public async Task<ActionResult<UserDto>> UpdateUser(string userId, [FromBody] UserInputDto input)
     {
         try
         {
-            return Ok(userLogic.UpdateUser(userId, input));
+            return Ok(await userLogic.UpdateUserAsync(userId, input));
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
+        }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
         }
     }
 
     [HttpPut("{userId}/settings")]
-    public ActionResult<UserDto> UpdateAccountSettings(string userId, [FromBody] AccountSettingsInputDto input)
+    public async Task<ActionResult<UserDto>> UpdateAccountSettings(string userId, [FromBody] AccountSettingsInputDto input)
     {
         try
         {
-            return Ok(userLogic.UpdateAccountSettings(userId, input));
+            return Ok(await userLogic.UpdateAccountSettingsAsync(userId, input));
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
         }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
     }
 
     [HttpDelete("{userId}")]
-    public IActionResult DeleteUser(string userId)
+    public async Task<IActionResult> DeleteUser(string userId)
     {
         try
         {
-            userLogic.DeleteUser(userId);
+            await userLogic.DeleteUserAsync(userId);
             return NoContent();
         }
         catch (BusinessException exception)
         {
             return FromBusinessException(exception);
+        }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
         }
     }
 }

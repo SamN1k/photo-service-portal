@@ -1,6 +1,7 @@
 using PSP.BusinessLayer.Actions;
 using PSP.BusinessLayer.Interfaces;
+using PSP.DataAccessLayer;
 
 namespace PSP.BusinessLayer.Core;
 
-public sealed class UserLogic(InMemoryDataStore store) : UserAction(store), IUserLogic;
+public sealed class UserLogic(PhotoPortalDbContext db) : UserAction(db), IUserLogic;

@@ -1,30 +1,34 @@
+using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
+using PSP.DataAccessLayer;
 using PSP.Domain.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 const string frontendCorsPolicy = "FrontendCorsPolicy";
+var connectionString = Environment.GetEnvironmentVariable("PSP_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is missing.");
 
 // Services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Database
+builder.Services.AddDbContext<PhotoPortalDbContext>(options =>
+{
+    options.UseNpgsql(
+        connectionString,
+        npgsql => npgsql.MigrationsAssembly(typeof(PhotoPortalDbContext).Assembly.FullName));
+});
+
 // Business Logic
-builder.Services.AddSingleton<BusinessLogic>();
-
-builder.Services.AddScoped<IAuthLogic>(
-    provider => provider.GetRequiredService<BusinessLogic>().GetAuthLogic());
-
-builder.Services.AddScoped<IUserLogic>(
-    provider => provider.GetRequiredService<BusinessLogic>().GetUserLogic());
-
-builder.Services.AddScoped<IOfferLogic>(
-    provider => provider.GetRequiredService<BusinessLogic>().GetOfferLogic());
-
-builder.Services.AddScoped<IBookingLogic>(
-    provider => provider.GetRequiredService<BusinessLogic>().GetBookingLogic());
+builder.Services.AddScoped<IAuthLogic, AuthLogic>();
+builder.Services.AddScoped<IUserLogic, UserLogic>();
+builder.Services.AddScoped<IOfferLogic, OfferLogic>();
+builder.Services.AddScoped<IBookingLogic, BookingLogic>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -39,6 +43,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+await InitializeDatabaseAsync(app);
 
 // Swagger
 app.UseSwagger();
@@ -93,4 +99,13 @@ static bool IsAllowedFrontendOrigin(string origin)
     return uri.IsLoopback ||
         uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase) ||
         uri.Host.EndsWith(".ngrok-free.dev", StringComparison.OrdinalIgnoreCase);
+}
+
+static async Task InitializeDatabaseAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<PhotoPortalDbContext>();
+
+    await db.Database.MigrateAsync();
+    await DatabaseSeeder.SeedAsync(db);
 }

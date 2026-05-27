@@ -1,10 +1,12 @@
+using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
-using PSP.Domain.Models;
+using PSP.DataAccessLayer;
 using PSP.Domain.Entities;
+using PSP.Domain.Models;
 
 namespace PSP.BusinessLayer.Actions;
 
-public class BookingAction(InMemoryDataStore store)
+public class BookingAction(PhotoPortalDbContext db)
 {
     private static readonly HashSet<string> Statuses = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -15,156 +17,154 @@ public class BookingAction(InMemoryDataStore store)
         "finalized"
     };
 
-    public PaginatedResultDto<BookingDto> ListBookings(BookingListQueryDto query)
+    public async Task<PaginatedResultDto<BookingDto>> ListBookingsAsync(BookingListQueryDto query)
     {
         if (query.ForceError || string.Equals(query.Query?.Trim(), "eroare", StringComparison.OrdinalIgnoreCase))
         {
             throw new BusinessException(500, "Serviciul API pentru rezervari a esuat.");
         }
 
-        lock (store.SyncRoot)
+        IQueryable<BookingEntity> bookings = db.Bookings.AsNoTracking();
+        var search = query.Query?.Trim() ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(query.ClientId))
         {
-            IEnumerable<BookingEntity> bookings = store.Bookings;
-            var search = query.Query?.Trim().ToLowerInvariant() ?? string.Empty;
-
-            if (!string.IsNullOrWhiteSpace(query.ClientId))
-            {
-                bookings = bookings.Where(booking => booking.ClientId == query.ClientId);
-            }
-
-            if (!string.IsNullOrWhiteSpace(query.PhotographerId))
-            {
-                bookings = bookings.Where(booking => booking.PhotographerId == query.PhotographerId);
-            }
-
-            if (!string.IsNullOrWhiteSpace(query.Status) && !IsAll(query.Status))
-            {
-                bookings = bookings.Where(booking => string.Equals(booking.Status, query.Status, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                bookings = bookings.Where(booking =>
-                    $"{booking.OfferTitle} {booking.PhotographerName} {booking.ClientName} {booking.Location}".ToLowerInvariant().Contains(search));
-            }
-
-            bookings = SortBookings(bookings, query.SortBy ?? "eventDateAsc");
-            return Pagination.From(bookings.Select(DtoMapper.ToDto).ToList(), query.Page, query.PageSize);
+            var clientId = query.ClientId.Trim();
+            bookings = bookings.Where(booking => booking.ClientId == clientId);
         }
+
+        if (!string.IsNullOrWhiteSpace(query.PhotographerId))
+        {
+            var photographerId = query.PhotographerId.Trim();
+            bookings = bookings.Where(booking => booking.PhotographerId == photographerId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Status) && !IsAll(query.Status))
+        {
+            var status = query.Status.Trim().ToLowerInvariant();
+            bookings = bookings.Where(booking => booking.Status == status);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var pattern = $"%{search}%";
+            bookings = bookings.Where(booking =>
+                EF.Functions.ILike(booking.OfferTitle, pattern) ||
+                EF.Functions.ILike(booking.PhotographerName, pattern) ||
+                EF.Functions.ILike(booking.ClientName, pattern) ||
+                EF.Functions.ILike(booking.Location, pattern));
+        }
+
+        bookings = SortBookings(bookings, query.SortBy ?? "eventDateAsc");
+        return await Pagination.FromQueryAsync(bookings, query.Page, query.PageSize, DtoMapper.ToDto);
     }
 
-    public BookingDto GetBooking(string bookingId)
+    public async Task<BookingDto> GetBookingAsync(string bookingId)
     {
-        lock (store.SyncRoot)
-        {
-            var booking = FindBooking(bookingId);
-            return DtoMapper.ToDto(booking);
-        }
+        var booking = await db.Bookings.AsNoTracking().FirstOrDefaultAsync(candidate => candidate.Id == bookingId)
+            ?? throw new BusinessException(404, "Rezervarea nu exista.");
+
+        return DtoMapper.ToDto(booking);
     }
 
-    public BookingDto CreateBooking(CreateBookingDto input)
+    public async Task<BookingDto> CreateBookingAsync(CreateBookingDto input)
     {
         var normalizedInput = NormalizeInput(new BookingInputDto(input.OfferId, input.EventDate, input.Location, input.BudgetEur, input.Notes));
         var clientId = NormalizeRequired(input.ClientId, "Clientul este obligatoriu.");
         var clientName = NormalizeRequired(input.ClientName, "Numele clientului este obligatoriu.");
+        var offer = await FindOfferAsync(normalizedInput.OfferId);
+        var client = await db.Users.FirstOrDefaultAsync(user => user.Id == clientId)
+            ?? throw new BusinessException(404, "Clientul nu exista.");
         var now = DateTimeOffset.UtcNow;
 
-        lock (store.SyncRoot)
+        var booking = new BookingEntity
         {
-            var offer = FindOffer(normalizedInput.OfferId);
-            var client = store.Users.FirstOrDefault(user => user.Id == clientId)
-                ?? throw new BusinessException(404, "Clientul nu exista.");
+            Id = $"booking-{Guid.NewGuid():N}"[..20],
+            ClientId = clientId,
+            ClientName = string.IsNullOrWhiteSpace(client.FullName) ? clientName : client.FullName,
+            OfferId = offer.Id,
+            OfferTitle = offer.Title,
+            PhotographerId = offer.PhotographerId,
+            PhotographerName = offer.PhotographerName,
+            EventDate = normalizedInput.EventDate,
+            Location = normalizedInput.Location,
+            BudgetEur = normalizedInput.BudgetEur,
+            Notes = normalizedInput.Notes,
+            Status = "pending",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
 
-            var booking = new BookingEntity
-            {
-                Id = $"booking-{Guid.NewGuid():N}"[..20],
-                ClientId = clientId,
-                ClientName = string.IsNullOrWhiteSpace(client.FullName) ? clientName : client.FullName,
-                OfferId = offer.Id,
-                OfferTitle = offer.Title,
-                PhotographerId = offer.PhotographerId,
-                PhotographerName = offer.PhotographerName,
-                EventDate = normalizedInput.EventDate,
-                Location = normalizedInput.Location,
-                BudgetEur = normalizedInput.BudgetEur,
-                Notes = normalizedInput.Notes,
-                Status = "pending",
-                CreatedAt = now,
-                UpdatedAt = now
-            };
+        db.Bookings.Add(booking);
+        client.TotalBookings += 1;
 
-            store.Bookings.Insert(0, booking);
-            client.TotalBookings += 1;
-
-            var photographer = store.Users.FirstOrDefault(user => user.Id == offer.PhotographerId);
-            if (photographer is not null)
-            {
-                photographer.TotalBookings += 1;
-                photographer.RevenueEur += booking.BudgetEur;
-            }
-
-            return DtoMapper.ToDto(booking);
+        var photographer = await db.Users.FirstOrDefaultAsync(user => user.Id == offer.PhotographerId);
+        if (photographer is not null)
+        {
+            photographer.TotalBookings += 1;
+            photographer.RevenueEur += booking.BudgetEur;
         }
+
+        await db.SaveChangesAsync();
+
+        return DtoMapper.ToDto(booking);
     }
 
-    public BookingDto UpdateBooking(string bookingId, BookingInputDto input)
+    public async Task<BookingDto> UpdateBookingAsync(string bookingId, BookingInputDto input)
     {
         var normalizedInput = NormalizeInput(input);
+        var booking = await FindBookingAsync(bookingId);
+        var offer = await FindOfferAsync(normalizedInput.OfferId);
 
-        lock (store.SyncRoot)
-        {
-            var booking = FindBooking(bookingId);
-            var offer = FindOffer(normalizedInput.OfferId);
+        booking.OfferId = offer.Id;
+        booking.OfferTitle = offer.Title;
+        booking.PhotographerId = offer.PhotographerId;
+        booking.PhotographerName = offer.PhotographerName;
+        booking.EventDate = normalizedInput.EventDate;
+        booking.Location = normalizedInput.Location;
+        booking.BudgetEur = normalizedInput.BudgetEur;
+        booking.Notes = normalizedInput.Notes;
+        booking.UpdatedAt = DateTimeOffset.UtcNow;
 
-            booking.OfferId = offer.Id;
-            booking.OfferTitle = offer.Title;
-            booking.PhotographerId = offer.PhotographerId;
-            booking.PhotographerName = offer.PhotographerName;
-            booking.EventDate = normalizedInput.EventDate;
-            booking.Location = normalizedInput.Location;
-            booking.BudgetEur = normalizedInput.BudgetEur;
-            booking.Notes = normalizedInput.Notes;
-            booking.UpdatedAt = DateTimeOffset.UtcNow;
+        await db.SaveChangesAsync();
 
-            return DtoMapper.ToDto(booking);
-        }
+        return DtoMapper.ToDto(booking);
     }
 
-    public BookingDto UpdateBookingStatus(string bookingId, UpdateBookingStatusDto input)
+    public async Task<BookingDto> UpdateBookingStatusAsync(string bookingId, UpdateBookingStatusDto input)
     {
         var status = NormalizeAllowed(input.Status, Statuses, "Statusul rezervarii este invalid.");
+        var booking = await FindBookingAsync(bookingId);
 
-        lock (store.SyncRoot)
-        {
-            var booking = FindBooking(bookingId);
-            booking.Status = status;
-            booking.UpdatedAt = DateTimeOffset.UtcNow;
-            return DtoMapper.ToDto(booking);
-        }
+        booking.Status = status;
+        booking.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await db.SaveChangesAsync();
+
+        return DtoMapper.ToDto(booking);
     }
 
-    public void DeleteBooking(string bookingId)
+    public async Task DeleteBookingAsync(string bookingId)
     {
-        lock (store.SyncRoot)
-        {
-            var booking = FindBooking(bookingId);
-            store.Bookings.Remove(booking);
-        }
+        var booking = await FindBookingAsync(bookingId);
+
+        db.Bookings.Remove(booking);
+        await db.SaveChangesAsync();
     }
 
-    private BookingEntity FindBooking(string bookingId)
+    private async Task<BookingEntity> FindBookingAsync(string bookingId)
     {
-        return store.Bookings.FirstOrDefault(candidate => candidate.Id == bookingId)
+        return await db.Bookings.FirstOrDefaultAsync(candidate => candidate.Id == bookingId)
             ?? throw new BusinessException(404, "Rezervarea nu exista.");
     }
 
-    private PhotoOfferEntity FindOffer(string offerId)
+    private async Task<PhotoOfferEntity> FindOfferAsync(string offerId)
     {
-        return store.Offers.FirstOrDefault(candidate => candidate.Id == offerId)
+        return await db.Offers.FirstOrDefaultAsync(candidate => candidate.Id == offerId)
             ?? throw new BusinessException(404, "Oferta nu exista.");
     }
 
-    private static IOrderedEnumerable<BookingEntity> SortBookings(IEnumerable<BookingEntity> bookings, string sortBy)
+    private static IOrderedQueryable<BookingEntity> SortBookings(IQueryable<BookingEntity> bookings, string sortBy)
     {
         return sortBy switch
         {
@@ -195,7 +195,7 @@ public class BookingAction(InMemoryDataStore store)
         return string.Equals(value, "all", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string NormalizeAllowed(string value, HashSet<string> allowedValues, string errorMessage)
+    private static string NormalizeAllowed(string? value, HashSet<string> allowedValues, string errorMessage)
     {
         var normalized = NormalizeRequired(value, errorMessage).ToLowerInvariant();
 
@@ -207,7 +207,7 @@ public class BookingAction(InMemoryDataStore store)
         return normalized;
     }
 
-    private static string NormalizeRequired(string value, string errorMessage)
+    private static string NormalizeRequired(string? value, string errorMessage)
     {
         if (string.IsNullOrWhiteSpace(value))
         {

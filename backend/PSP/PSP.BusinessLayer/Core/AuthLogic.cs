@@ -1,6 +1,7 @@
 using PSP.BusinessLayer.Actions;
 using PSP.BusinessLayer.Interfaces;
+using PSP.DataAccessLayer;
 
 namespace PSP.BusinessLayer.Core;
 
-public sealed class AuthLogic(InMemoryDataStore store) : AuthAction(store), IAuthLogic;
+public sealed class AuthLogic(PhotoPortalDbContext db) : AuthAction(db), IAuthLogic;

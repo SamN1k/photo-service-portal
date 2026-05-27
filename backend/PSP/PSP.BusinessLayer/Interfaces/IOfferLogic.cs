@@ -4,9 +4,9 @@ namespace PSP.BusinessLayer.Interfaces;
 
 public interface IOfferLogic
 {
-    PaginatedResultDto<PhotoOfferDto> ListOffers(OfferListQueryDto query);
-    PhotoOfferDto GetOffer(string offerId);
-    PhotoOfferDto CreateOffer(CreateOfferDto input);
-    PhotoOfferDto UpdateOffer(string offerId, OfferInputDto input);
-    void DeleteOffer(string offerId);
+    Task<PaginatedResultDto<PhotoOfferDto>> ListOffersAsync(OfferListQueryDto query);
+    Task<PhotoOfferDto> GetOfferAsync(string offerId);
+    Task<PhotoOfferDto> CreateOfferAsync(CreateOfferDto input);
+    Task<PhotoOfferDto> UpdateOfferAsync(string offerId, OfferInputDto input);
+    Task DeleteOfferAsync(string offerId);
 }

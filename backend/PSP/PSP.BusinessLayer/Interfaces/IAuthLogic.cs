@@ -4,7 +4,7 @@ namespace PSP.BusinessLayer.Interfaces;
 
 public interface IAuthLogic
 {
-    AuthSessionDto Login(LoginCredentialsDto credentials);
-    AuthSessionDto SignUp(SignUpPayloadDto payload);
-    IReadOnlyList<DemoAccountDto> GetDemoAccounts();
+    Task<AuthSessionDto> LoginAsync(LoginCredentialsDto credentials);
+    Task<AuthSessionDto> SignUpAsync(SignUpPayloadDto payload);
+    Task<IReadOnlyList<DemoAccountDto>> GetDemoAccountsAsync();
 }
