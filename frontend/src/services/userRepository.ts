@@ -1,4 +1,4 @@
-import { MOCK_ACCOUNTS, type MockAccount } from '../data/mockData';
+import { MOCK_ACCOUNTS, type MockAccount } from '../_mock/mockData';
 import type { UserRecord } from '../types/models';
 import { storageService } from './storageService';
 
