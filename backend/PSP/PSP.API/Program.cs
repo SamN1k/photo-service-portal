@@ -49,9 +49,10 @@ var app = builder.Build();
 await InitializeDatabaseAsync(app);
 
 // Swagger
-app.UseSwagger();
-app.UseSwaggerUI();
-
+if(app.Environment.IsDevelopment()){ 
+    app.UseSwagger(); 
+    app.UseSwaggerUI();
+}
 // Middleware
 app.UseCors(frontendCorsPolicy);
 
