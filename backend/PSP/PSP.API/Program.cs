@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using PSP.BusinessLayer.Structure;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
@@ -11,11 +13,42 @@ const string frontendCorsPolicy = "FrontendCorsPolicy";
 var connectionString = Environment.GetEnvironmentVariable("PSP_CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is missing.");
+var jwtOptions = ReadJwtOptions(builder.Configuration);
+ValidateJwtOptions(jwtOptions);
 
 // Services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition(
+        JwtBearerDefaults.AuthenticationScheme,
+        new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = JwtBearerDefaults.AuthenticationScheme,
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Introdu token-ul JWT in format Bearer."
+        });
+
+    options.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = JwtBearerDefaults.AuthenticationScheme
+                    }
+                },
+                []
+            }
+        });
+});
 
 // Database
 builder.Services.AddDbContext<PhotoPortalDbContext>(options =>
@@ -26,11 +59,42 @@ builder.Services.AddDbContext<PhotoPortalDbContext>(options =>
 });
 
 // Business Logic
+builder.Services.AddSingleton(jwtOptions);
+builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+builder.Services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 builder.Services.AddSingleton<IPasswordResetEmailSender, PasswordResetEmailSender>();
 builder.Services.AddScoped<IAuthLogic, AuthLogic>();
 builder.Services.AddScoped<IUserLogic, UserLogic>();
 builder.Services.AddScoped<IOfferLogic, OfferLogic>();
 builder.Services.AddScoped<IBookingLogic, BookingLogic>();
+
+// JWT Authentication / RBAC
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = JwtTokenService.CreateValidationParameters(jwtOptions);
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = async context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+                await context.Response.WriteAsJsonAsync(
+                    new ErrorResponseDto(401, "Token JWT lipsa, expirat sau invalid."));
+            },
+            OnForbidden = async context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+
+                await context.Response.WriteAsJsonAsync(
+                    new ErrorResponseDto(403, "Rolul curent nu permite accesul la aceasta resursa."));
+            }
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -56,6 +120,7 @@ if(app.Environment.IsDevelopment()){
 // Middleware
 app.UseCors(frontendCorsPolicy);
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Global Exception Handler
@@ -102,6 +167,38 @@ static bool IsAllowedFrontendOrigin(string origin)
     return uri.IsLoopback ||
         uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase) ||
         uri.Host.EndsWith(".ngrok-free.dev", StringComparison.OrdinalIgnoreCase);
+}
+
+static JwtOptions ReadJwtOptions(IConfiguration configuration)
+{
+    var section = configuration.GetSection("Jwt");
+    _ = int.TryParse(section["ExpirationMinutes"], out var expirationMinutes);
+
+    return new JwtOptions
+    {
+        Issuer = section["Issuer"] ?? string.Empty,
+        Audience = section["Audience"] ?? string.Empty,
+        SecretKey = section["SecretKey"] ?? string.Empty,
+        ExpirationMinutes = expirationMinutes > 0 ? expirationMinutes : 120
+    };
+}
+
+static void ValidateJwtOptions(JwtOptions options)
+{
+    if (string.IsNullOrWhiteSpace(options.Issuer))
+    {
+        throw new InvalidOperationException("Configuratia Jwt:Issuer lipseste.");
+    }
+
+    if (string.IsNullOrWhiteSpace(options.Audience))
+    {
+        throw new InvalidOperationException("Configuratia Jwt:Audience lipseste.");
+    }
+
+    if (string.IsNullOrWhiteSpace(options.SecretKey))
+    {
+        throw new InvalidOperationException("Configuratia Jwt:SecretKey lipseste.");
+    }
 }
 
 static async Task InitializeDatabaseAsync(WebApplication app)

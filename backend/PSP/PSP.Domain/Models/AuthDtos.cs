@@ -27,10 +27,15 @@ public sealed record PasswordResetCompleteDto(
     string Code,
     string NewPassword);
 
+public sealed record JwtTokenResultDto(
+    string Token,
+    DateTimeOffset ExpiresAt);
+
 public sealed record AuthSessionDto(
     string Token,
     UserDto User,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    DateTimeOffset ExpiresAt);
 
 public sealed record DemoAccountDto(
     string Email,

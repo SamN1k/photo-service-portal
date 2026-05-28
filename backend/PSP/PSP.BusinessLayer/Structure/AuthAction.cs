@@ -10,7 +10,11 @@ using PSP.Domain.Models;
 
 namespace PSP.BusinessLayer.Structure;
 
-public class AuthAction(PhotoPortalDbContext db, IPasswordResetEmailSender emailSender)
+public class AuthAction(
+    PhotoPortalDbContext db,
+    IPasswordResetEmailSender emailSender,
+    IPasswordHasher passwordHasher,
+    IJwtTokenService jwtTokenService)
 {
     private const int ResetCodeExpirationMinutes = 10;
     private static readonly ConcurrentDictionary<string, PasswordResetTicket> PasswordResetTickets = new(StringComparer.OrdinalIgnoreCase);
@@ -21,7 +25,7 @@ public class AuthAction(PhotoPortalDbContext db, IPasswordResetEmailSender email
         var password = NormalizeRequired(credentials.Password, "Parola este obligatorie.");
         var user = await db.Users.FirstOrDefaultAsync(candidate => candidate.Email == email);
 
-        if (user is null || user.Password != password)
+        if (user is null || !passwordHasher.Verify(password, user.Password))
         {
             throw new BusinessException(401, "Email sau parola invalida.");
         }
@@ -31,6 +35,7 @@ public class AuthAction(PhotoPortalDbContext db, IPasswordResetEmailSender email
             throw new BusinessException(403, "Contul este suspendat.");
         }
 
+        UpgradePasswordHashIfNeeded(user, password);
         user.LastLogin = DateTimeOffset.UtcNow;
         await db.SaveChangesAsync();
 
@@ -54,7 +59,7 @@ public class AuthAction(PhotoPortalDbContext db, IPasswordResetEmailSender email
             Id = $"{role}-{Guid.NewGuid():N}"[..18],
             FullName = fullName,
             Email = email,
-            Password = password,
+            Password = passwordHasher.Hash(password),
             Role = role,
             Status = "active",
             CreatedAt = DateTimeOffset.UtcNow,
@@ -114,7 +119,7 @@ public class AuthAction(PhotoPortalDbContext db, IPasswordResetEmailSender email
         var user = await db.Users.FirstOrDefaultAsync(candidate => candidate.Email == email)
             ?? throw new BusinessException(404, "Nu exista un cont cu acest email.");
 
-        user.Password = newPassword;
+        user.Password = passwordHasher.Hash(newPassword);
         await db.SaveChangesAsync();
         PasswordResetTickets.TryRemove(email, out _);
 
@@ -128,16 +133,27 @@ public class AuthAction(PhotoPortalDbContext db, IPasswordResetEmailSender email
             .Where(user => user.Status == "active")
             .OrderBy(user => user.CreatedAt)
             .Take(3)
-            .Select(user => new DemoAccountDto(user.Email, user.Password, user.Role, user.FullName))
+            .Select(user => new DemoAccountDto(user.Email, "demo1234", user.Role, user.FullName))
             .ToListAsync();
     }
 
-    private static AuthSessionDto CreateSession(UserEntity user)
+    private AuthSessionDto CreateSession(UserEntity user)
     {
+        var token = jwtTokenService.GenerateToken(user);
+
         return new AuthSessionDto(
-            $"api-token-{user.Id}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
+            token.Token,
             DtoMapper.ToDto(user),
-            DateTimeOffset.UtcNow);
+            DateTimeOffset.UtcNow,
+            token.ExpiresAt);
+    }
+
+    private void UpgradePasswordHashIfNeeded(UserEntity user, string plainPassword)
+    {
+        if (!passwordHasher.IsHashed(user.Password))
+        {
+            user.Password = passwordHasher.Hash(plainPassword);
+        }
     }
 
     private static string NormalizeEmail(string? value)

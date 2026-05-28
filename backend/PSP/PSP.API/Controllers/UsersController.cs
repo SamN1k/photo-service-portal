@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
@@ -7,9 +8,11 @@ using PSP.Domain.Models;
 namespace PSP.API.Controllers;
 
 [Route("api/users")]
+[Authorize]
 public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<PaginatedResultDto<UserDto>>> ListUsers([FromQuery] UserListQueryDto filters)
     {
         try
@@ -27,6 +30,7 @@ public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserInputDto input)
     {
         try
@@ -45,6 +49,7 @@ public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
     }
 
     [HttpPut("{userId}")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<UserDto>> UpdateUser(string userId, [FromBody] UserInputDto input)
     {
         try
@@ -64,6 +69,11 @@ public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
     [HttpPut("{userId}/settings")]
     public async Task<ActionResult<UserDto>> UpdateAccountSettings(string userId, [FromBody] AccountSettingsInputDto input)
     {
+        if (!CurrentUserIsAdmin && !IsCurrentUser(userId))
+        {
+            return Forbid();
+        }
+
         try
         {
             return Ok(await userLogic.UpdateAccountSettingsAsync(userId, input));
@@ -79,6 +89,7 @@ public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
     }
 
     [HttpGet("{photographerId}/portfolio")]
+    [AllowAnonymous]
     public async Task<ActionResult<PhotographerPortfolioDto>> GetPhotographerPortfolio(string photographerId)
     {
         try
@@ -96,10 +107,16 @@ public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
     }
 
     [HttpPut("{photographerId}/portfolio")]
+    [Authorize(Roles = "photographer,admin")]
     public async Task<ActionResult<PhotographerPortfolioDto>> UpdatePhotographerPortfolio(
         string photographerId,
         [FromBody] PhotographerPortfolioInputDto input)
     {
+        if (!CurrentUserIsAdmin && !IsCurrentUser(photographerId))
+        {
+            return Forbid();
+        }
+
         try
         {
             return Ok(await userLogic.UpdatePhotographerPortfolioAsync(photographerId, input));
@@ -115,6 +132,7 @@ public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
     }
 
     [HttpDelete("{userId}")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> DeleteUser(string userId)
     {
         try

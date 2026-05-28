@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
+using PSP.BusinessLayer.Interfaces;
 using PSP.DataAccessLayer.Context;
 using PSP.Domain.Entities;
 using PSP.Domain.Models;
 
 namespace PSP.BusinessLayer.Structure;
 
-public class UserAction(PhotoPortalDbContext db)
+public class UserAction(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
 {
     private const int MaxPortfolioGalleryImages = 12;
 
@@ -76,7 +77,7 @@ public class UserAction(PhotoPortalDbContext db)
             Id = $"{role}-{Guid.NewGuid():N}"[..18],
             FullName = fullName,
             Email = email,
-            Password = string.IsNullOrWhiteSpace(input.Password) ? "demo1234" : input.Password.Trim(),
+            Password = passwordHasher.Hash(string.IsNullOrWhiteSpace(input.Password) ? "demo1234" : input.Password.Trim()),
             Role = role,
             Status = status,
             CreatedAt = DateTimeOffset.UtcNow,
@@ -112,7 +113,7 @@ public class UserAction(PhotoPortalDbContext db)
 
         if (!string.IsNullOrWhiteSpace(input.Password))
         {
-            user.Password = input.Password.Trim();
+            user.Password = passwordHasher.Hash(input.Password.Trim());
         }
 
         await db.SaveChangesAsync();
@@ -134,7 +135,7 @@ public class UserAction(PhotoPortalDbContext db)
 
         var user = await FindUserAsync(userId);
 
-        if (user.Password != currentPassword)
+        if (!passwordHasher.Verify(currentPassword, user.Password))
         {
             throw new BusinessException(403, "Parola curenta este invalida.");
         }
@@ -151,7 +152,7 @@ public class UserAction(PhotoPortalDbContext db)
 
         if (!string.IsNullOrWhiteSpace(newPassword))
         {
-            user.Password = newPassword;
+            user.Password = passwordHasher.Hash(newPassword);
         }
 
         await db.SaveChangesAsync();

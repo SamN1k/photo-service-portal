@@ -22,6 +22,7 @@ export interface AuthSession {
     token: string;
     user: UserRecord;
     createdAt: string;
+    expiresAt: string;
 }
 
 export interface LoginCredentials {
