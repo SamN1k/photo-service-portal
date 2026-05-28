@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using PSP.BusinessLayer.Actions;
+using PSP.BusinessLayer.Structure;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
 using PSP.DataAccessLayer.Context;

@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Mail;
 using PSP.BusinessLayer.Interfaces;
 
-namespace PSP.BusinessLayer.Actions;
+namespace PSP.BusinessLayer.Structure;
 
 public sealed class PasswordResetEmailSender : IPasswordResetEmailSender
 {

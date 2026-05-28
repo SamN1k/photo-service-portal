@@ -1,7 +1,7 @@
 using PSP.Domain.Models;
 using PSP.Domain.Entities;
 
-namespace PSP.BusinessLayer.Actions;
+namespace PSP.BusinessLayer.Structure;
 
 internal static class DtoMapper
 {

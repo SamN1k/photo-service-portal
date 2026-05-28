@@ -4,7 +4,7 @@ using PSP.DataAccessLayer.Context;
 using PSP.Domain.Entities;
 using PSP.Domain.Models;
 
-namespace PSP.BusinessLayer.Actions;
+namespace PSP.BusinessLayer.Structure;
 
 public class UserAction(PhotoPortalDbContext db)
 {

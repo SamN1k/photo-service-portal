@@ -1,4 +1,4 @@
-using PSP.BusinessLayer.Actions;
+using PSP.BusinessLayer.Structure;
 using PSP.BusinessLayer.Interfaces;
 using PSP.DataAccessLayer.Context;
 
