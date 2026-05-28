@@ -12,6 +12,10 @@ export interface UserRecord {
     totalBookings: number;
     revenueEur: number;
     lastLogin?: string;
+    phoneNumber: string;
+    profileImageUrl: string;
+    portfolioDescription: string;
+    portfolioGalleryImageUrls: string[];
 }
 
 export interface AuthSession {
@@ -55,6 +59,25 @@ export interface PasswordResetCompletePayload {
     email: string;
     code: string;
     newPassword: string;
+}
+
+export interface PhotographerPortfolio {
+    photographerId: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    profileImageUrl: string;
+    description: string;
+    galleryImageUrls: string[];
+}
+
+export interface PhotographerPortfolioInput {
+    fullName: string;
+    email: string;
+    phoneNumber?: string;
+    profileImageUrl?: string;
+    description?: string;
+    galleryImageUrls?: string[];
 }
 
 export type OfferCategory = 'wedding' | 'portrait' | 'event' | 'commercial';

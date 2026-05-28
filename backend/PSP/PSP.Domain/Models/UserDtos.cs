@@ -9,7 +9,11 @@ public sealed record UserDto(
     DateTimeOffset CreatedAt,
     int TotalBookings,
     decimal RevenueEur,
-    DateTimeOffset? LastLogin);
+    DateTimeOffset? LastLogin,
+    string PhoneNumber,
+    string ProfileImageUrl,
+    string PortfolioDescription,
+    IReadOnlyList<string> PortfolioGalleryImageUrls);
 
 public sealed record UserInputDto(
     string FullName,
@@ -23,6 +27,23 @@ public sealed record AccountSettingsInputDto(
     string Email,
     string CurrentPassword,
     string? NewPassword);
+
+public sealed record PhotographerPortfolioDto(
+    string PhotographerId,
+    string FullName,
+    string Email,
+    string PhoneNumber,
+    string ProfileImageUrl,
+    string Description,
+    IReadOnlyList<string> GalleryImageUrls);
+
+public sealed record PhotographerPortfolioInputDto(
+    string FullName,
+    string Email,
+    string? PhoneNumber,
+    string? ProfileImageUrl,
+    string? Description,
+    IReadOnlyList<string>? GalleryImageUrls);
 
 public sealed class UserListQueryDto
 {

@@ -10,11 +10,11 @@ namespace PSP.API.Controllers;
 public sealed class OffersController(IOfferLogic offerLogic) : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<PaginatedResultDto<PhotoOfferDto>>> ListOffers([FromQuery] OfferListQueryDto query)
+    public async Task<ActionResult<PaginatedResultDto<PhotoOfferDto>>> ListOffers([FromQuery] OfferListQueryDto filters)
     {
         try
         {
-            return Ok(await offerLogic.ListOffersAsync(query));
+            return Ok(await offerLogic.ListOffersAsync(filters));
         }
         catch (BusinessException exception)
         {

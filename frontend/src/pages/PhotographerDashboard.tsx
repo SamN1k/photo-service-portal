@@ -495,7 +495,14 @@ const PhotographerDashboard = () => {
                         </option>
                     ))}
                 </select>
-                <select value={sortBy} onChange={(event) => setSortBy(event.target.value as OfferSort)} className="form-input">
+                <select
+                    value={sortBy}
+                    onChange={(event) => {
+                        setSortBy(event.target.value as OfferSort);
+                        setPage(1);
+                    }}
+                    className="form-input"
+                >
                     {offerSortOptions.map((option) => (
                         <option key={option.value} value={option.value}>
                             {option.label}

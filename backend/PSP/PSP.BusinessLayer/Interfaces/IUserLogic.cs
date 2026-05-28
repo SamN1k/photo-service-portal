@@ -8,5 +8,7 @@ public interface IUserLogic
     Task<UserDto> CreateUserAsync(UserInputDto input);
     Task<UserDto> UpdateUserAsync(string userId, UserInputDto input);
     Task<UserDto> UpdateAccountSettingsAsync(string userId, AccountSettingsInputDto input);
+    Task<PhotographerPortfolioDto> GetPhotographerPortfolioAsync(string photographerId);
+    Task<PhotographerPortfolioDto> UpdatePhotographerPortfolioAsync(string photographerId, PhotographerPortfolioInputDto input);
     Task DeleteUserAsync(string userId);
 }

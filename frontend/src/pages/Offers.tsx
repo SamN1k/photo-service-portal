@@ -199,11 +199,12 @@ const Offers = () => {
 
                     <select
                         value={sortBy}
-                        onChange={(event) =>
+                        onChange={(event) => {
                             setSortBy(
                                 event.target.value as OfferSort,
-                            )
-                        }
+                            );
+                            setPage(1);
+                        }}
                         className="form-input"
                     >
                         {sortOptions.map((option) => (
@@ -381,6 +382,16 @@ const Offers = () => {
                                                             pentru clienti
                                                         </span>
                                                     )}
+
+                                                    <Link
+                                                        to={PATHS.PHOTOGRAPHER_PUBLIC_PORTFOLIO.replace(
+                                                            ':photographerId',
+                                                            offer.photographerId,
+                                                        )}
+                                                        className="mt-3 inline-flex w-full justify-center rounded-lg bg-[#b08968] px-4 py-2 text-sm font-semibold text-black hover:bg-[#9c7554]"
+                                                    >
+                                                        Vezi informatii fotograf
+                                                    </Link>
                                                 </div>
                                             </div>
                                         </article>

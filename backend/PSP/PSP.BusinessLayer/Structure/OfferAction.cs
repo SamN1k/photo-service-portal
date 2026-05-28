@@ -61,11 +61,15 @@ public class OfferAction(PhotoPortalDbContext db)
         if (!string.IsNullOrWhiteSpace(search))
         {
             var pattern = $"%{search}%";
+            var categoryAliases = ResolveCategoryAliases(search);
+
             offers = offers.Where(offer =>
                 EF.Functions.ILike(offer.Title, pattern) ||
                 EF.Functions.ILike(offer.Description, pattern) ||
                 EF.Functions.ILike(offer.Location, pattern) ||
-                EF.Functions.ILike(offer.PhotographerName, pattern));
+                EF.Functions.ILike(offer.PhotographerName, pattern) ||
+                EF.Functions.ILike(offer.Category, pattern) ||
+                categoryAliases.Contains(offer.Category));
         }
 
         offers = SortOffers(offers, query.SortBy ?? "newest");
@@ -159,12 +163,35 @@ public class OfferAction(PhotoPortalDbContext db)
     {
         return sortBy switch
         {
-            "priceAsc" => offers.OrderBy(offer => offer.PriceEur),
-            "priceDesc" => offers.OrderByDescending(offer => offer.PriceEur),
-            "ratingDesc" => offers.OrderByDescending(offer => offer.Rating),
+            "priceAsc" => offers.OrderBy(offer => offer.PriceEur).ThenBy(offer => offer.Title),
+            "priceDesc" => offers.OrderByDescending(offer => offer.PriceEur).ThenBy(offer => offer.Title),
+            "ratingDesc" => offers.OrderByDescending(offer => offer.Rating).ThenBy(offer => offer.Title),
             "titleAsc" => offers.OrderBy(offer => offer.Title),
-            _ => offers.OrderByDescending(offer => offer.CreatedAt)
+            _ => offers.OrderByDescending(offer => offer.CreatedAt).ThenBy(offer => offer.Title)
         };
+    }
+
+    private static IReadOnlyList<string> ResolveCategoryAliases(string search)
+    {
+        var normalized = search.Trim().ToLowerInvariant();
+        var aliases = new List<string>();
+
+        AddAlias(aliases, normalized, "wedding", "nunta");
+        AddAlias(aliases, normalized, "portrait", "portret");
+        AddAlias(aliases, normalized, "event", "eveniment");
+        AddAlias(aliases, normalized, "commercial", "comercial");
+
+        return aliases;
+    }
+
+    private static void AddAlias(List<string> aliases, string search, string category, string label)
+    {
+        if (category.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+            label.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+            search.Contains(label, StringComparison.OrdinalIgnoreCase))
+        {
+            aliases.Add(category);
+        }
     }
 
     private static OfferInputDto NormalizeInput(OfferInputDto input)

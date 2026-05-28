@@ -8,6 +8,8 @@ namespace PSP.BusinessLayer.Structure;
 
 public class UserAction(PhotoPortalDbContext db)
 {
+    private const int MaxPortfolioGalleryImages = 12;
+
     private static readonly HashSet<string> Roles = new(StringComparer.OrdinalIgnoreCase)
     {
         "user",
@@ -157,6 +159,36 @@ public class UserAction(PhotoPortalDbContext db)
         return DtoMapper.ToDto(user);
     }
 
+    public async Task<PhotographerPortfolioDto> GetPhotographerPortfolioAsync(string photographerId)
+    {
+        var photographer = await FindPhotographerAsync(photographerId);
+        return DtoMapper.ToPortfolioDto(photographer);
+    }
+
+    public async Task<PhotographerPortfolioDto> UpdatePhotographerPortfolioAsync(string photographerId, PhotographerPortfolioInputDto input)
+    {
+        var photographer = await FindPhotographerAsync(photographerId);
+        var fullName = NormalizeRequired(input.FullName, "Numele fotografului este obligatoriu.");
+        var email = NormalizeEmail(input.Email);
+        var emailIsUsed = await db.Users.AnyAsync(candidate => candidate.Id != photographerId && candidate.Email == email);
+
+        if (emailIsUsed)
+        {
+            throw new BusinessException(409, "Emailul este deja folosit de alt utilizator.");
+        }
+
+        photographer.FullName = fullName;
+        photographer.Email = email;
+        photographer.PhoneNumber = NormalizeOptional(input.PhoneNumber, 64, "Numarul de telefon este prea lung.");
+        photographer.ProfileImageUrl = NormalizeOptional(input.ProfileImageUrl);
+        photographer.PortfolioDescription = NormalizeOptional(input.Description, 4000, "Descrierea portofoliului este prea lunga.");
+        photographer.PortfolioGalleryImageUrls = NormalizeGallery(input.GalleryImageUrls);
+
+        await db.SaveChangesAsync();
+
+        return DtoMapper.ToPortfolioDto(photographer);
+    }
+
     public async Task DeleteUserAsync(string userId)
     {
         var user = await FindUserAsync(userId);
@@ -178,6 +210,18 @@ public class UserAction(PhotoPortalDbContext db)
     {
         return await db.Users.FirstOrDefaultAsync(candidate => candidate.Id == userId)
             ?? throw new BusinessException(404, "Utilizatorul nu exista.");
+    }
+
+    private async Task<UserEntity> FindPhotographerAsync(string photographerId)
+    {
+        var user = await FindUserAsync(photographerId);
+
+        if (!string.Equals(user.Role, "photographer", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new BusinessException(404, "Portofoliul fotografului nu exista.");
+        }
+
+        return user;
     }
 
     private static IOrderedQueryable<UserEntity> SortUsers(IQueryable<UserEntity> users, string sortBy)
@@ -218,6 +262,40 @@ public class UserAction(PhotoPortalDbContext db)
         }
 
         return normalized;
+    }
+
+    private static string NormalizeOptional(string? value, int maxLength, string errorMessage)
+    {
+        var normalized = value?.Trim() ?? string.Empty;
+
+        if (normalized.Length > maxLength)
+        {
+            throw new BusinessException(422, errorMessage);
+        }
+
+        return normalized;
+    }
+
+    private static string NormalizeOptional(string? value)
+    {
+        return value?.Trim() ?? string.Empty;
+    }
+
+    private static string NormalizeGallery(IReadOnlyList<string>? imageUrls)
+    {
+        var normalized = (imageUrls ?? [])
+            .Select(imageUrl => imageUrl.Trim())
+            .Where(imageUrl => !string.IsNullOrWhiteSpace(imageUrl))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(MaxPortfolioGalleryImages + 1)
+            .ToList();
+
+        if (normalized.Count > MaxPortfolioGalleryImages)
+        {
+            throw new BusinessException(422, $"Galeria poate contine maximum {MaxPortfolioGalleryImages} imagini.");
+        }
+
+        return string.Join('\n', normalized);
     }
 
     private static string NormalizeRequired(string? value, string errorMessage)

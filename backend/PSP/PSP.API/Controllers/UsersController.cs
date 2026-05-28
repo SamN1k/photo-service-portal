@@ -10,11 +10,11 @@ namespace PSP.API.Controllers;
 public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<PaginatedResultDto<UserDto>>> ListUsers([FromQuery] UserListQueryDto query)
+    public async Task<ActionResult<PaginatedResultDto<UserDto>>> ListUsers([FromQuery] UserListQueryDto filters)
     {
         try
         {
-            return Ok(await userLogic.ListUsersAsync(query));
+            return Ok(await userLogic.ListUsersAsync(filters));
         }
         catch (BusinessException exception)
         {
@@ -67,6 +67,42 @@ public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
         try
         {
             return Ok(await userLogic.UpdateAccountSettingsAsync(userId, input));
+        }
+        catch (BusinessException exception)
+        {
+            return FromBusinessException(exception);
+        }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
+    }
+
+    [HttpGet("{photographerId}/portfolio")]
+    public async Task<ActionResult<PhotographerPortfolioDto>> GetPhotographerPortfolio(string photographerId)
+    {
+        try
+        {
+            return Ok(await userLogic.GetPhotographerPortfolioAsync(photographerId));
+        }
+        catch (BusinessException exception)
+        {
+            return FromBusinessException(exception);
+        }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
+    }
+
+    [HttpPut("{photographerId}/portfolio")]
+    public async Task<ActionResult<PhotographerPortfolioDto>> UpdatePhotographerPortfolio(
+        string photographerId,
+        [FromBody] PhotographerPortfolioInputDto input)
+    {
+        try
+        {
+            return Ok(await userLogic.UpdatePhotographerPortfolioAsync(photographerId, input));
         }
         catch (BusinessException exception)
         {
