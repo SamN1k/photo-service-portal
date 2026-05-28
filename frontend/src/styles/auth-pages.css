@@ -1,14 +1,17 @@
 .auth-shell {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
     background:
         linear-gradient(90deg, rgb(255 255 255 / 96%), rgb(248 250 252 / 86%)),
         url("https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1800&q=80") center/cover;
 }
 
+.auth-main {
+    flex: 1;
+}
+
 .auth-card {
     border: 1px solid rgb(226 232 240);
     border-radius: 8px;
-}
-
-.auth-role-option {
-    min-height: 128px;
 }

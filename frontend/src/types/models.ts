@@ -29,7 +29,32 @@ export interface SignUpPayload {
     fullName: string;
     email: string;
     password: string;
-    role: UserRole;
+    role?: UserRole;
+}
+
+export interface PasswordResetRequestPayload {
+    email: string;
+}
+
+export interface PasswordResetRequestResult {
+    email: string;
+    expiresAt: string;
+}
+
+export interface PasswordResetCodePayload {
+    email: string;
+    code: string;
+}
+
+export interface PasswordResetCodeResult {
+    email: string;
+    verified: boolean;
+}
+
+export interface PasswordResetCompletePayload {
+    email: string;
+    code: string;
+    newPassword: string;
 }
 
 export type OfferCategory = 'wedding' | 'portrait' | 'event' | 'commercial';
