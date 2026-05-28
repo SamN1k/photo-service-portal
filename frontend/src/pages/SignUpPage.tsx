@@ -15,12 +15,6 @@ const dashboardPathByRole: Record<UserRole, string> = {
     admin: PATHS.ADMIN_PANEL,
 };
 
-const roleOptions: Array<{ value: UserRole; label: string; helper: string }> = [
-    { value: 'user', label: 'Client', helper: 'Cauta fotografi si trimite cereri de rezervare.' },
-    { value: 'photographer', label: 'Fotograf', helper: 'Publica oferte si gestioneaza cererile primite.' },
-    { value: 'admin', label: 'Admin', helper: 'Gestioneaza utilizatori si datele demo ale platformei.' },
-];
-
 interface SignUpErrors {
     fullName?: string;
     email?: string;
@@ -31,7 +25,6 @@ interface SignUpErrors {
 const SignUpPage = () => {
     const { isAuthenticated, user, signUp } = useAuth();
     const navigate = useNavigate();
-    const [selectedRole, setSelectedRole] = useState<UserRole>('user');
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -76,7 +69,6 @@ const SignUpPage = () => {
                 fullName,
                 email,
                 password,
-                role: selectedRole,
             });
             toast.success(`Cont creat pentru ${session.user.fullName}.`);
             navigate(dashboardPathByRole[session.user.role], { replace: true });
@@ -92,45 +84,13 @@ const SignUpPage = () => {
     return (
         <div className="auth-shell min-h-screen">
             <Header />
-            <main className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[1fr_460px]">
-                <section>
-                    <p className="text-sm font-semibold uppercase text-teal-700">Cont API nou</p>
-                    <h1 className="mt-2 text-4xl font-bold text-slate-950">Inregistrare cu rol si sesiune persistenta</h1>
-                    <p className="mt-4 max-w-2xl text-slate-600">
-                        Conturile noi sunt salvate local, apar in administrare si pot fi folosite imediat pentru demo.
-                    </p>
-                </section>
-
-                <section className="auth-card bg-white p-6 shadow-sm">
-                    <h2 className="text-2xl font-bold text-slate-950">Creeaza cont</h2>
+            <main className="auth-main mx-auto flex w-full max-w-7xl items-center justify-center px-4 py-10">
+                <section className="auth-card w-full max-w-md bg-white p-6 shadow-sm">
+                    <h1 className="text-2xl font-bold text-slate-950">Creeaza cont</h1>
+                    <p className="mt-2 text-sm text-slate-600">Completeaza datele pentru un cont nou.</p>
                     {errors.form && <div className="mt-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{errors.form}</div>}
 
                     <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
-                        <fieldset>
-                            <legend className="mb-3 text-sm font-semibold text-slate-800">Rol</legend>
-                            <div className="grid gap-3">
-                                {roleOptions.map((role) => (
-                                    <label
-                                        key={role.value}
-                                        className={`auth-role-option cursor-pointer rounded-lg border p-4 ${
-                                            selectedRole === role.value ? 'border-teal-700 bg-teal-50' : 'border-slate-200 bg-white'
-                                        }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="role"
-                                            value={role.value}
-                                            checked={selectedRole === role.value}
-                                            onChange={() => setSelectedRole(role.value)}
-                                            className="sr-only"
-                                        />
-                                        <span className="font-semibold text-slate-950">{role.label}</span>
-                                        <span className="mt-1 block text-sm text-slate-600">{role.helper}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </fieldset>
-
                         <div>
                             <label className="mb-2 block text-sm font-semibold text-slate-800" htmlFor="signup-name">
                                 Nume complet

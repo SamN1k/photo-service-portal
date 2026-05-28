@@ -44,6 +44,57 @@ public sealed class AuthController(IAuthLogic authLogic) : ApiControllerBase
         }
     }
 
+    [HttpPost("password-reset/request")]
+    public async Task<ActionResult<PasswordResetRequestResultDto>> RequestPasswordReset([FromBody] PasswordResetRequestDto payload)
+    {
+        try
+        {
+            return Ok(await authLogic.RequestPasswordResetAsync(payload));
+        }
+        catch (BusinessException exception)
+        {
+            return FromBusinessException(exception);
+        }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
+    }
+
+    [HttpPost("password-reset/verify")]
+    public async Task<ActionResult<PasswordResetCodeResultDto>> VerifyPasswordResetCode([FromBody] PasswordResetCodeDto payload)
+    {
+        try
+        {
+            return Ok(await authLogic.VerifyPasswordResetCodeAsync(payload));
+        }
+        catch (BusinessException exception)
+        {
+            return FromBusinessException(exception);
+        }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
+    }
+
+    [HttpPost("password-reset/complete")]
+    public async Task<ActionResult<UserDto>> CompletePasswordReset([FromBody] PasswordResetCompleteDto payload)
+    {
+        try
+        {
+            return Ok(await authLogic.CompletePasswordResetAsync(payload));
+        }
+        catch (BusinessException exception)
+        {
+            return FromBusinessException(exception);
+        }
+        catch (DbUpdateException exception)
+        {
+            return FromDatabaseException(exception);
+        }
+    }
+
     [HttpGet("demo-accounts")]
     public async Task<ActionResult<IReadOnlyList<DemoAccountDto>>> GetDemoAccounts()
     {

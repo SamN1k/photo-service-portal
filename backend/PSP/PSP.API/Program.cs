@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PSP.BusinessLayer.Actions;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
 using PSP.DataAccessLayer.Context;
@@ -25,6 +26,7 @@ builder.Services.AddDbContext<PhotoPortalDbContext>(options =>
 });
 
 // Business Logic
+builder.Services.AddSingleton<IPasswordResetEmailSender, PasswordResetEmailSender>();
 builder.Services.AddScoped<IAuthLogic, AuthLogic>();
 builder.Services.AddScoped<IUserLogic, UserLogic>();
 builder.Services.AddScoped<IOfferLogic, OfferLogic>();

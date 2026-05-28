@@ -4,4 +4,5 @@ using PSP.DataAccessLayer.Context;
 
 namespace PSP.BusinessLayer.Core;
 
-public sealed class AuthLogic(PhotoPortalDbContext db) : AuthAction(db), IAuthLogic;
+public sealed class AuthLogic(PhotoPortalDbContext db, IPasswordResetEmailSender? emailSender = null)
+    : AuthAction(db, emailSender ?? new PasswordResetEmailSender()), IAuthLogic;
