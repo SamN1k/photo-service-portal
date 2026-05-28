@@ -16,6 +16,10 @@ export const MOCK_ACCOUNTS: MockAccount[] = [
         totalBookings: 3,
         revenueEur: 0,
         lastLogin: '2026-05-05T08:25:00.000Z',
+        phoneNumber: '',
+        profileImageUrl: '',
+        portfolioDescription: '',
+        portfolioGalleryImageUrls: [],
     },
     {
         id: 'photo-001',
@@ -28,6 +32,16 @@ export const MOCK_ACCOUNTS: MockAccount[] = [
         totalBookings: 18,
         revenueEur: 6150,
         lastLogin: '2026-05-07T11:30:00.000Z',
+        phoneNumber: '+373 69 145 802',
+        profileImageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80',
+        portfolioDescription:
+            'Fotograf de eveniment cu accent pe cadre naturale, lumina calda si editare editoriala. Lucrez cu nunti, cununii civile, portrete business si evenimente corporate.',
+        portfolioGalleryImageUrls: [
+            'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80',
+            'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=900&q=80',
+            'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=900&q=80',
+            'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80',
+        ],
     },
     {
         id: 'admin-001',
@@ -40,6 +54,10 @@ export const MOCK_ACCOUNTS: MockAccount[] = [
         totalBookings: 0,
         revenueEur: 0,
         lastLogin: '2026-05-08T07:55:00.000Z',
+        phoneNumber: '',
+        profileImageUrl: '',
+        portfolioDescription: '',
+        portfolioGalleryImageUrls: [],
     },
     {
         id: 'user-002',
@@ -52,6 +70,10 @@ export const MOCK_ACCOUNTS: MockAccount[] = [
         totalBookings: 1,
         revenueEur: 0,
         lastLogin: '2026-04-20T14:05:00.000Z',
+        phoneNumber: '',
+        profileImageUrl: '',
+        portfolioDescription: '',
+        portfolioGalleryImageUrls: [],
     },
     {
         id: 'photo-002',
@@ -63,6 +85,15 @@ export const MOCK_ACCOUNTS: MockAccount[] = [
         createdAt: '2026-03-01T14:05:00.000Z',
         totalBookings: 2,
         revenueEur: 900,
+        phoneNumber: '+40 744 332 118',
+        profileImageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80',
+        portfolioDescription:
+            'Fotograf de familie si evenimente restranse. Imi place sa surprind expresii sincere, detalii de decor si fotografii luminoase pentru albume personale.',
+        portfolioGalleryImageUrls: [
+            'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=900&q=80',
+            'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=900&q=80',
+            'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=900&q=80',
+        ],
     },
 ];
 

@@ -16,7 +16,23 @@ internal static class DtoMapper
             user.CreatedAt,
             user.TotalBookings,
             user.RevenueEur,
-            user.LastLogin);
+            user.LastLogin,
+            user.PhoneNumber,
+            user.ProfileImageUrl,
+            user.PortfolioDescription,
+            SplitGallery(user.PortfolioGalleryImageUrls));
+    }
+
+    public static PhotographerPortfolioDto ToPortfolioDto(UserEntity user)
+    {
+        return new PhotographerPortfolioDto(
+            user.Id,
+            user.FullName,
+            user.Email,
+            user.PhoneNumber,
+            user.ProfileImageUrl,
+            user.PortfolioDescription,
+            SplitGallery(user.PortfolioGalleryImageUrls));
     }
 
     public static PhotoOfferDto ToDto(PhotoOfferEntity offer)
@@ -55,5 +71,17 @@ internal static class DtoMapper
             booking.Status,
             booking.CreatedAt,
             booking.UpdatedAt);
+    }
+
+    private static IReadOnlyList<string> SplitGallery(string? galleryImageUrls)
+    {
+        if (string.IsNullOrWhiteSpace(galleryImageUrls))
+        {
+            return [];
+        }
+
+        return galleryImageUrls
+            .Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .ToList();
     }
 }

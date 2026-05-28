@@ -1,5 +1,12 @@
 import apiClient from '../api/axios';
-import type { PaginatedResult, UserRecord, UserRole, UserStatus } from '../types/models';
+import type {
+    PaginatedResult,
+    PhotographerPortfolio,
+    PhotographerPortfolioInput,
+    UserRecord,
+    UserRole,
+    UserStatus,
+} from '../types/models';
 
 export type UserSort = 'newest' | 'nameAsc' | 'revenueDesc' | 'bookingsDesc';
 
@@ -46,6 +53,19 @@ export const userService = {
 
     async updateAccountSettings(userId: string, input: AccountSettingsInput): Promise<UserRecord> {
         const { data } = await apiClient.put<UserRecord>(`/users/${userId}/settings`, input);
+        return data;
+    },
+
+    async getPhotographerPortfolio(photographerId: string): Promise<PhotographerPortfolio> {
+        const { data } = await apiClient.get<PhotographerPortfolio>(`/users/${photographerId}/portfolio`);
+        return data;
+    },
+
+    async updatePhotographerPortfolio(
+        photographerId: string,
+        input: PhotographerPortfolioInput,
+    ): Promise<PhotographerPortfolio> {
+        const { data } = await apiClient.put<PhotographerPortfolio>(`/users/${photographerId}/portfolio`, input);
         return data;
     },
 

@@ -12,6 +12,7 @@ interface NavItem {
 const navItems: NavItem[] = [
     { name: 'Rezervarile mele', path: PATHS.USER_DASHBOARD, roles: ['user'] },
     { name: 'Ofertele mele', path: PATHS.PHOTOGRAPHER_DASHBOARD, roles: ['photographer'] },
+    { name: 'Setari portofoliu', path: PATHS.PHOTOGRAPHER_PORTFOLIO_SETTINGS, roles: ['photographer'] },
     { name: 'Administrare', path: PATHS.ADMIN_PANEL, roles: ['admin'] },
     { name: 'Catalog oferte', path: PATHS.OFFERS, roles: ['user', 'photographer', 'admin'] },
     { name: 'Setari cont', path: PATHS.ACCOUNT_SETTINGS, roles: ['user', 'photographer', 'admin'] },

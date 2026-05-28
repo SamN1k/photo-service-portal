@@ -6,6 +6,8 @@ import LoginPage from '../pages/LoginPage';
 import Offers from '../pages/Offers';
 import PaymentPage from '../pages/PaymentPage';
 import PhotographerDashboard from '../pages/PhotographerDashboard';
+import PhotographerPortfolioPage from '../pages/PhotographerPortfolioPage';
+import PhotographerPortfolioSettingsPage from '../pages/PhotographerPortfolioSettingsPage';
 import PhotographerResultsPage from '../pages/PhotographerResultsPage';
 import SignUpPage from '../pages/SignUpPage';
 import UserDashboard from '../pages/UserDashboard';
@@ -20,6 +22,7 @@ export const router = createBrowserRouter([
     { path: PATHS.LOGIN, element: <LoginPage /> },
     { path: PATHS.SIGN_UP, element: <SignUpPage /> },
     { path: PATHS.OFFERS, element: <Offers /> },
+    { path: PATHS.PHOTOGRAPHER_PUBLIC_PORTFOLIO, element: <PhotographerPortfolioPage /> },
     {
         element: <AuthGuard allowedRoles={['user']} />,
         children: [
@@ -49,6 +52,7 @@ export const router = createBrowserRouter([
                 element: <DashboardLayout />,
                 children: [
                     { path: PATHS.PHOTOGRAPHER_DASHBOARD, element: <PhotographerDashboard /> },
+                    { path: PATHS.PHOTOGRAPHER_PORTFOLIO_SETTINGS, element: <PhotographerPortfolioSettingsPage /> },
                     { path: PATHS.PHOTOGRAPHER_RESULTS, element: <PhotographerResultsPage /> },
                 ],
             },

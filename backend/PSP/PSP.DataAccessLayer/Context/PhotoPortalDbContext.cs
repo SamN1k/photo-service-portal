@@ -28,6 +28,10 @@ public sealed class PhotoPortalDbContext(DbContextOptions<PhotoPortalDbContext> 
         entity.Property(user => user.Password).HasMaxLength(256).IsRequired();
         entity.Property(user => user.Role).HasMaxLength(32).IsRequired();
         entity.Property(user => user.Status).HasMaxLength(32).IsRequired();
+        entity.Property(user => user.PhoneNumber).HasMaxLength(64).IsRequired();
+        entity.Property(user => user.ProfileImageUrl).IsRequired();
+        entity.Property(user => user.PortfolioDescription).HasMaxLength(4000).IsRequired();
+        entity.Property(user => user.PortfolioGalleryImageUrls).IsRequired();
         entity.Property(user => user.RevenueEur).HasPrecision(12, 2);
 
         entity.HasIndex(user => user.Email).IsUnique();
