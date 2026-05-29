@@ -112,6 +112,16 @@ export const router = createBrowserRouter([
         ),
     },
     {
+        path: PATHS.API_UNAVAILABLE,
+        element: (
+            <HttpErrorPage
+                statusCode={503}
+                title="API indisponibil"
+                description="Backend-ul nu raspunde momentan. Porneste API-ul si reincarca pagina."
+            />
+        ),
+    },
+    {
         path: PATHS.NOT_FOUND,
         element: <HttpErrorPage statusCode={404} title="Not Found" description="Ruta accesata nu exista in aplicatia demo." />,
     },

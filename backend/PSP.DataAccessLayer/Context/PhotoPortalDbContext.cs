@@ -57,7 +57,7 @@ public sealed class PhotoPortalDbContext(DbContextOptions<PhotoPortalDbContext> 
         entity.Property(offer => offer.PhotographerName).HasMaxLength(160).IsRequired();
         entity.Property(offer => offer.Status).HasMaxLength(32).IsRequired();
         entity.Property(offer => offer.Rating).HasPrecision(3, 2);
-        entity.Property(offer => offer.CoverImageUrl).HasMaxLength(8192).IsRequired();
+        entity.Property(offer => offer.CoverImageUrl).IsRequired();
 
         entity.HasIndex(offer => offer.Category);
         entity.HasIndex(offer => offer.PhotographerId);

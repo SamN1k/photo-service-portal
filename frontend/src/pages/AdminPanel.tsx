@@ -227,21 +227,11 @@ const AdminPanel = () => {
         }
     };
 
-    const handleSimulateError = () => {
-        toast.info('Se simuleaza o eroare 500 in serviciul de utilizatori.');
-        void loadData(true);
-    };
-
     return (
         <div className="space-y-6">
             <PageHeader
                 title="Admin Control Panel"
                 description="Administrare prin API pentru utilizatori, roluri si statusuri gestionate in BusinessLayer."
-                actions={
-                    <button type="button" onClick={handleSimulateError} className="rounded-lg border border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-rose-700">
-                        Simuleaza 500
-                    </button>
-                }
             />
 
             <section className="grid gap-4 md:grid-cols-4">

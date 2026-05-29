@@ -4,7 +4,7 @@ import Header from '../../components/Header';
 import { PATHS } from '../../routes/paths';
 
 interface HttpErrorPageProps {
-    statusCode: 401 | 403 | 404 | 500;
+    statusCode: 401 | 403 | 404 | 500 | 503;
     title: string;
     description: string;
 }
@@ -19,6 +19,7 @@ const actionByStatus: Record<HttpErrorPageProps['statusCode'], { label: string; 
     403: { label: 'Inapoi la dashboard', to: PATHS.HOME },
     404: { label: 'Inapoi acasa', to: PATHS.HOME },
     500: { label: 'Reincarca aplicatia', to: PATHS.HOME },
+    503: { label: 'Reincearca', to: PATHS.HOME },
 };
 
 const HttpErrorPage = ({ statusCode, title, description }: HttpErrorPageProps) => {

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 
 import Footer from '../components/Footer';
 import Header from '../components/Header';
@@ -124,14 +123,6 @@ const Offers = () => {
         return filters;
     }, [category, query]);
 
-    const handleSimulateError = () => {
-        toast.info(
-            'Se simuleaza o eroare 500 in serviciul API.',
-        );
-
-        void loadOffers(true);
-    };
-
     return (
         <div className="app-shell min-h-screen">
             <Header />
@@ -152,14 +143,6 @@ const Offers = () => {
                             maestrii cadrelor.
                         </p>
                     </div>
-
-                    <button
-                        type="button"
-                        onClick={handleSimulateError}
-                        className="rounded-lg border border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-rose-700"
-                    >
-                        Simuleaza 500
-                    </button>
                 </div>
 
                 <section className="soft-panel mt-6 grid gap-3 p-4 md:grid-cols-[1fr_220px_220px]">

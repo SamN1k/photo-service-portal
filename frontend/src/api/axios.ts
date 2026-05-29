@@ -58,6 +58,8 @@ const messageByStatus = (status: number): string => {
             return 'Exista un conflict cu datele existente.';
         case 500:
             return 'Serverul a returnat o eroare interna.';
+        case 503:
+            return 'API-ul nu este disponibil momentan.';
         default:
             return 'Cererea catre API nu a reusit.';
     }
