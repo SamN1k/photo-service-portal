@@ -58,7 +58,7 @@ const Sidebar = () => {
 
             <nav className="mt-0 flex gap-2 overflow-x-auto lg:mt-5 lg:flex-col lg:overflow-visible">
                 {visibleItems.map((item) => (
-                    <NavLink key={item.path} to={item.path} className={linkClassName(item.variant)}>
+                    <NavLink key={item.path} to={item.path} end className={linkClassName(item.variant)}>
                         {item.name}
                     </NavLink>
                 ))}
