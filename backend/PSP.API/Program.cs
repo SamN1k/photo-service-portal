@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using PSP.BusinessLayer.Structure;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
+using PSP.BusinessLayer.Security;
+using PSP.BusinessLayer.Structure;
 using PSP.DataAccessLayer.Context;
 using PSP.Domain.Models;
 

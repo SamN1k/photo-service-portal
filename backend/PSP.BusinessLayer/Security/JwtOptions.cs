@@ -1,4 +1,4 @@
-namespace PSP.BusinessLayer.Structure;
+namespace PSP.BusinessLayer.Security;
 
 public sealed class JwtOptions
 {

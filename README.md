@@ -12,21 +12,21 @@ Configurarea implicita foloseste PostgreSQL local:
 "DefaultConnection": "Host=localhost;Port=5432;Database=psp_photo_portal;Username=postgres;Password=12345678"
 ```
 
-Daca ai alta parola sau alta baza de date, modifica `backend/PSP/PSP.API/appsettings.json`
+Daca ai alta parola sau alta baza de date, modifica `backend/PSP.API/appsettings.json`
 sau seteaza variabila `PSP_CONNECTION_STRING`.
 
-Migrarea initiala este generata in `backend/PSP/PSP.DataAccessLayer/Migrations`.
+Migrarea initiala este generata in `backend/PSP.DataAccessLayer/Migrations`.
 Aplica schema pe baza de date dupa ce PostgreSQL este pornit:
 
 ```bash
-cd backend/PSP
+cd backend
 dotnet ef database update --project PSP.DataAccessLayer/PSP.DataAccessLayer.csproj --startup-project PSP.API/PSP.API.csproj --context PhotoPortalDbContext
 ```
 
 La pornirea API-ului se ruleaza automat migrarile lipsa si seed-ul initial, doar daca tabela `Users` este goala.
 
 ```bash
-cd backend/PSP
+cd backend
 dotnet run --project PSP.API/PSP.API.csproj --launch-profile http
 ```
 

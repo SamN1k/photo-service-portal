@@ -1,8 +1,10 @@
-using PSP.BusinessLayer.Structure;
+using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
+using PSP.BusinessLayer.Security;
+using PSP.BusinessLayer.Structure;
 using PSP.DataAccessLayer.Context;
 
-namespace PSP.BusinessLayer.Core;
+namespace PSP.BusinessLayer;
 
 public sealed class BusinessLogic(
     PhotoPortalDbContext db,

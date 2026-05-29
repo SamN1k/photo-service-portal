@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using PSP.BusinessLayer.Interfaces;
 
-namespace PSP.BusinessLayer.Structure;
+namespace PSP.BusinessLayer.Security;
 
 public sealed class Pbkdf2PasswordHasher : IPasswordHasher
 {

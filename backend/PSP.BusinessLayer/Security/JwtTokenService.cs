@@ -6,7 +6,7 @@ using PSP.BusinessLayer.Interfaces;
 using PSP.Domain.Entities;
 using PSP.Domain.Models;
 
-namespace PSP.BusinessLayer.Structure;
+namespace PSP.BusinessLayer.Security;
 
 public sealed class JwtTokenService(JwtOptions options) : IJwtTokenService
 {
