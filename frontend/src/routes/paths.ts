@@ -17,6 +17,7 @@ export const PATHS = {
     UNAUTHORIZED: '/401',
     FORBIDDEN: '/403',
     SERVER_ERROR: '/500',
+    API_UNAVAILABLE: '/api-unavailable',
     NOT_FOUND: '*',
 } as const;
 

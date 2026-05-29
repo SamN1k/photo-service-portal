@@ -114,8 +114,7 @@ namespace PSP.DataAccessLayer.Migrations
 
                     b.Property<string>("CoverImageUrl")
                         .IsRequired()
-                        .HasMaxLength(8192)
-                        .HasColumnType("character varying(8192)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
