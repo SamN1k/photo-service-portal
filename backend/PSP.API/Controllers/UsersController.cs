@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PSP.BusinessLayer;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
 using PSP.Domain.Models;
@@ -9,8 +10,16 @@ namespace PSP.API.Controllers;
 
 [Route("api/users")]
 [Authorize]
-public sealed class UsersController(IUserLogic userLogic) : ApiControllerBase
+public sealed class UsersController : ApiControllerBase
 {
+    private readonly IUserLogic userLogic;
+
+    public UsersController()
+    {
+        var businessLogic = new BusinessLogic();
+        userLogic = businessLogic.GetUserLogic();
+    }
+
     [HttpGet]
     [Authorize(Roles = "admin")]
     public async Task<ActionResult<PaginatedResultDto<UserDto>>> ListUsers([FromQuery] UserListQueryDto filters)

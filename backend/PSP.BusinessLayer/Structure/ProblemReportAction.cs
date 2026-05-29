@@ -6,7 +6,7 @@ using PSP.Domain.Models;
 
 namespace PSP.BusinessLayer.Structure;
 
-public class ProblemReportAction(PhotoPortalDbContext db)
+public class ProblemReportAction
 {
     private static readonly HashSet<string> ReporterRoles = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -20,12 +20,12 @@ public class ProblemReportAction(PhotoPortalDbContext db)
         "reviewed"
     };
 
-    public async Task<PaginatedResultDto<ProblemReportDto>> ListReportsAsync(ProblemReportListQueryDto query)
+    protected async Task<PaginatedResultDto<ProblemReportDto>> ListReportsActionAsync(ProblemReportListQueryDto query)
     {
         return await ListReportsCoreAsync(query, null);
     }
 
-    public async Task<PaginatedResultDto<ProblemReportDto>> ListReporterReportsAsync(string reporterId, ProblemReportListQueryDto query)
+    protected async Task<PaginatedResultDto<ProblemReportDto>> ListReporterReportsActionAsync(string reporterId, ProblemReportListQueryDto query)
     {
         var normalizedReporterId = NormalizeRequired(reporterId, "Utilizatorul autentificat este obligatoriu.");
         return await ListReportsCoreAsync(query, normalizedReporterId);
@@ -33,6 +33,8 @@ public class ProblemReportAction(PhotoPortalDbContext db)
 
     private async Task<PaginatedResultDto<ProblemReportDto>> ListReportsCoreAsync(ProblemReportListQueryDto query, string? reporterId)
     {
+        using var db = new PhotoPortalDbContext();
+
         if (query.ForceError || string.Equals(query.Query?.Trim(), "eroare", StringComparison.OrdinalIgnoreCase))
         {
             throw new BusinessException(500, "Serviciul API pentru reporturi a esuat.");
@@ -73,8 +75,9 @@ public class ProblemReportAction(PhotoPortalDbContext db)
         return await Pagination.FromQueryAsync(reports, query.Page, query.PageSize, DtoMapper.ToDto);
     }
 
-    public async Task<ProblemReportDto> CreateReportAsync(string reporterId, ProblemReportInputDto input)
+    protected async Task<ProblemReportDto> CreateReportActionAsync(string reporterId, ProblemReportInputDto input)
     {
+        using var db = new PhotoPortalDbContext();
         var reporter = await db.Users.AsNoTracking().FirstOrDefaultAsync(user => user.Id == reporterId)
             ?? throw new BusinessException(404, "Utilizatorul autentificat nu exista.");
 
@@ -125,8 +128,9 @@ public class ProblemReportAction(PhotoPortalDbContext db)
         return DtoMapper.ToDto(report);
     }
 
-    public async Task<ProblemReportDto> UpdateReportStatusAsync(string reportId, ProblemReportStatusUpdateDto input)
+    protected async Task<ProblemReportDto> UpdateReportStatusActionAsync(string reportId, ProblemReportStatusUpdateDto input)
     {
+        using var db = new PhotoPortalDbContext();
         var status = NormalizeAllowed(input.Status, Statuses, "Statusul reportului este invalid.");
         var report = await db.ProblemReports.FirstOrDefaultAsync(candidate => candidate.Id == reportId)
             ?? throw new BusinessException(404, "Reportul nu exista.");

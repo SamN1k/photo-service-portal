@@ -6,7 +6,7 @@ using PSP.Domain.Models;
 
 namespace PSP.BusinessLayer.Structure;
 
-public class OfferAction(PhotoPortalDbContext db)
+public class OfferAction
 {
     private const string DefaultCoverImageUrl = "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=900&q=80";
 
@@ -25,8 +25,10 @@ public class OfferAction(PhotoPortalDbContext db)
         "archived"
     };
 
-    public async Task<PaginatedResultDto<PhotoOfferDto>> ListOffersAsync(OfferListQueryDto query)
+    protected async Task<PaginatedResultDto<PhotoOfferDto>> ListOffersActionAsync(OfferListQueryDto query)
     {
+        using var db = new PhotoPortalDbContext();
+
         if (query.ForceError || string.Equals(query.Query?.Trim(), "eroare", StringComparison.OrdinalIgnoreCase))
         {
             throw new BusinessException(500, "Serviciul API pentru oferte a esuat.");
@@ -76,16 +78,18 @@ public class OfferAction(PhotoPortalDbContext db)
         return await Pagination.FromQueryAsync(offers, query.Page, query.PageSize, DtoMapper.ToDto);
     }
 
-    public async Task<PhotoOfferDto> GetOfferAsync(string offerId)
+    protected async Task<PhotoOfferDto> GetOfferActionAsync(string offerId)
     {
+        using var db = new PhotoPortalDbContext();
         var offer = await db.Offers.AsNoTracking().FirstOrDefaultAsync(candidate => candidate.Id == offerId)
             ?? throw new BusinessException(404, "Oferta nu exista.");
 
         return DtoMapper.ToDto(offer);
     }
 
-    public async Task<PhotoOfferDto> CreateOfferAsync(CreateOfferDto input)
+    protected async Task<PhotoOfferDto> CreateOfferActionAsync(CreateOfferDto input)
     {
+        using var db = new PhotoPortalDbContext();
         var normalizedInput = NormalizeInput(new OfferInputDto(
             input.Title,
             input.Description,
@@ -125,10 +129,11 @@ public class OfferAction(PhotoPortalDbContext db)
         return DtoMapper.ToDto(offer);
     }
 
-    public async Task<PhotoOfferDto> UpdateOfferAsync(string offerId, OfferInputDto input)
+    protected async Task<PhotoOfferDto> UpdateOfferActionAsync(string offerId, OfferInputDto input)
     {
+        using var db = new PhotoPortalDbContext();
         var normalizedInput = NormalizeInput(input);
-        var offer = await FindOfferAsync(offerId);
+        var offer = await FindOfferAsync(db, offerId);
 
         offer.Title = normalizedInput.Title;
         offer.Description = normalizedInput.Description;
@@ -145,15 +150,16 @@ public class OfferAction(PhotoPortalDbContext db)
         return DtoMapper.ToDto(offer);
     }
 
-    public async Task DeleteOfferAsync(string offerId)
+    protected async Task DeleteOfferActionAsync(string offerId)
     {
-        var offer = await FindOfferAsync(offerId);
+        using var db = new PhotoPortalDbContext();
+        var offer = await FindOfferAsync(db, offerId);
 
         db.Offers.Remove(offer);
         await db.SaveChangesAsync();
     }
 
-    private async Task<PhotoOfferEntity> FindOfferAsync(string offerId)
+    private static async Task<PhotoOfferEntity> FindOfferAsync(PhotoPortalDbContext db, string offerId)
     {
         return await db.Offers.FirstOrDefaultAsync(candidate => candidate.Id == offerId)
             ?? throw new BusinessException(404, "Oferta nu exista.");

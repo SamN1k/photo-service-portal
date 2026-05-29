@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PSP.BusinessLayer;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
 using PSP.Domain.Models;
@@ -9,8 +10,16 @@ namespace PSP.API.Controllers;
 
 [Route("api/bookings")]
 [Authorize]
-public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControllerBase
+public sealed class BookingsController : ApiControllerBase
 {
+    private readonly IBookingLogic bookingLogic;
+
+    public BookingsController()
+    {
+        var businessLogic = new BusinessLogic();
+        bookingLogic = businessLogic.GetBookingLogic();
+    }
+
     [HttpGet]
     public async Task<ActionResult<PaginatedResultDto<BookingDto>>> ListBookings([FromQuery] BookingListQueryDto filters)
     {

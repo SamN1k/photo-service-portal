@@ -3,24 +3,24 @@ using System.Globalization;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
-using PSP.BusinessLayer.Interfaces;
+using PSP.BusinessLayer.Security;
 using PSP.DataAccessLayer.Context;
 using PSP.Domain.Entities;
 using PSP.Domain.Models;
 
 namespace PSP.BusinessLayer.Structure;
 
-public class AuthAction(
-    PhotoPortalDbContext db,
-    IPasswordResetEmailSender emailSender,
-    IPasswordHasher passwordHasher,
-    IJwtTokenService jwtTokenService)
+public class AuthAction
 {
     private const int ResetCodeExpirationMinutes = 10;
     private static readonly ConcurrentDictionary<string, PasswordResetTicket> PasswordResetTickets = new(StringComparer.OrdinalIgnoreCase);
+    private readonly PasswordResetEmailSender emailSender = new();
+    private readonly Pbkdf2PasswordHasher passwordHasher = new();
+    private readonly JwtTokenService jwtTokenService = new(JwtOptions.Current);
 
-    public async Task<AuthSessionDto> LoginAsync(LoginCredentialsDto credentials)
+    protected async Task<AuthSessionDto> LoginActionAsync(LoginCredentialsDto credentials)
     {
+        using var db = new PhotoPortalDbContext();
         var email = NormalizeRequired(credentials.Email, "Emailul este obligatoriu.").ToLowerInvariant();
         var password = NormalizeRequired(credentials.Password, "Parola este obligatorie.");
         var user = await db.Users.FirstOrDefaultAsync(candidate => candidate.Email == email);
@@ -42,8 +42,9 @@ public class AuthAction(
         return CreateSession(user);
     }
 
-    public async Task<AuthSessionDto> SignUpAsync(SignUpPayloadDto payload)
+    protected async Task<AuthSessionDto> SignUpActionAsync(SignUpPayloadDto payload)
     {
+        using var db = new PhotoPortalDbContext();
         var fullName = NormalizeRequired(payload.FullName, "Numele este obligatoriu.");
         var email = NormalizeEmail(payload.Email);
         var password = NormalizePassword(payload.Password);
@@ -74,8 +75,9 @@ public class AuthAction(
         return CreateSession(user);
     }
 
-    public async Task<PasswordResetRequestResultDto> RequestPasswordResetAsync(PasswordResetRequestDto payload)
+    protected async Task<PasswordResetRequestResultDto> RequestPasswordResetActionAsync(PasswordResetRequestDto payload)
     {
+        using var db = new PhotoPortalDbContext();
         var email = NormalizeEmail(payload.Email);
         var userExists = await db.Users.AnyAsync(candidate => candidate.Email == email);
 
@@ -93,7 +95,7 @@ public class AuthAction(
         return new PasswordResetRequestResultDto(email, expiresAt);
     }
 
-    public Task<PasswordResetCodeResultDto> VerifyPasswordResetCodeAsync(PasswordResetCodeDto payload)
+    protected Task<PasswordResetCodeResultDto> VerifyPasswordResetCodeActionAsync(PasswordResetCodeDto payload)
     {
         var email = NormalizeEmail(payload.Email);
         var code = NormalizeCode(payload.Code);
@@ -104,8 +106,9 @@ public class AuthAction(
         return Task.FromResult(new PasswordResetCodeResultDto(email, true));
     }
 
-    public async Task<UserDto> CompletePasswordResetAsync(PasswordResetCompleteDto payload)
+    protected async Task<UserDto> CompletePasswordResetActionAsync(PasswordResetCompleteDto payload)
     {
+        using var db = new PhotoPortalDbContext();
         var email = NormalizeEmail(payload.Email);
         var code = NormalizeCode(payload.Code);
         var newPassword = NormalizePassword(payload.NewPassword);
@@ -126,8 +129,9 @@ public class AuthAction(
         return DtoMapper.ToDto(user);
     }
 
-    public async Task<IReadOnlyList<DemoAccountDto>> GetDemoAccountsAsync()
+    protected async Task<IReadOnlyList<DemoAccountDto>> GetDemoAccountsActionAsync()
     {
+        using var db = new PhotoPortalDbContext();
         return await db.Users
             .AsNoTracking()
             .Where(user => user.Status == "active")

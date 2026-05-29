@@ -6,5 +6,3 @@ public sealed record PaginatedResultDto<T>(
     int Page,
     int PageSize,
     int TotalPages);
-
-public sealed record ErrorResponseDto(int StatusCode, string Message);
