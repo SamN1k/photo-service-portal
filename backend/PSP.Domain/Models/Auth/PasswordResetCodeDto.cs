@@ -1,4 +1,4 @@
-namespace PSP.Domain.Models;
+namespace PSP.Domain.Models.Auth;
 
 public sealed record PasswordResetCodeDto(
     string Email,

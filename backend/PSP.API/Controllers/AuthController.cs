@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
-using PSP.Domain.Models;
+using PSP.Domain.Models.Auth;
+using PSP.Domain.Models.User;
 
 namespace PSP.API.Controllers;
 

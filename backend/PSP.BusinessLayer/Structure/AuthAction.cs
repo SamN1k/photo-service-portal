@@ -6,7 +6,8 @@ using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Security;
 using PSP.DataAccessLayer.Context;
 using PSP.Domain.Entities;
-using PSP.Domain.Models;
+using PSP.Domain.Models.Auth;
+using PSP.Domain.Models.User;
 
 namespace PSP.BusinessLayer.Structure;
 
@@ -14,13 +15,18 @@ public class AuthAction
 {
     private const int ResetCodeExpirationMinutes = 10;
     private static readonly ConcurrentDictionary<string, PasswordResetTicket> PasswordResetTickets = new(StringComparer.OrdinalIgnoreCase);
+    private readonly PhotoPortalDbContext db;
     private readonly PasswordResetEmailSender emailSender = new();
     private readonly Pbkdf2PasswordHasher passwordHasher = new();
     private readonly JwtTokenService jwtTokenService = new(JwtOptions.Current);
 
+    public AuthAction()
+    {
+        db = new PhotoPortalDbContext();
+    }
+
     protected async Task<AuthSessionDto> LoginActionAsync(LoginCredentialsDto credentials)
     {
-        using var db = new PhotoPortalDbContext();
         var email = NormalizeRequired(credentials.Email, "Emailul este obligatoriu.").ToLowerInvariant();
         var password = NormalizeRequired(credentials.Password, "Parola este obligatorie.");
         var user = await db.Users.FirstOrDefaultAsync(candidate => candidate.Email == email);
@@ -44,7 +50,6 @@ public class AuthAction
 
     protected async Task<AuthSessionDto> SignUpActionAsync(SignUpPayloadDto payload)
     {
-        using var db = new PhotoPortalDbContext();
         var fullName = NormalizeRequired(payload.FullName, "Numele este obligatoriu.");
         var email = NormalizeEmail(payload.Email);
         var password = NormalizePassword(payload.Password);
@@ -77,7 +82,6 @@ public class AuthAction
 
     protected async Task<PasswordResetRequestResultDto> RequestPasswordResetActionAsync(PasswordResetRequestDto payload)
     {
-        using var db = new PhotoPortalDbContext();
         var email = NormalizeEmail(payload.Email);
         var userExists = await db.Users.AnyAsync(candidate => candidate.Email == email);
 
@@ -108,7 +112,6 @@ public class AuthAction
 
     protected async Task<UserDto> CompletePasswordResetActionAsync(PasswordResetCompleteDto payload)
     {
-        using var db = new PhotoPortalDbContext();
         var email = NormalizeEmail(payload.Email);
         var code = NormalizeCode(payload.Code);
         var newPassword = NormalizePassword(payload.NewPassword);
@@ -131,7 +134,6 @@ public class AuthAction
 
     protected async Task<IReadOnlyList<DemoAccountDto>> GetDemoAccountsActionAsync()
     {
-        using var db = new PhotoPortalDbContext();
         return await db.Users
             .AsNoTracking()
             .Where(user => user.Status == "active")

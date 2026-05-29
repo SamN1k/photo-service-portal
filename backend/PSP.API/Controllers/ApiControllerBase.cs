@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
-using PSP.Domain.Models;
+using PSP.Domain.Models.Common;
 
 namespace PSP.API.Controllers;
 

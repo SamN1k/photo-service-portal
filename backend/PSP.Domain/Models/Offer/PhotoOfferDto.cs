@@ -1,4 +1,4 @@
-namespace PSP.Domain.Models;
+namespace PSP.Domain.Models.Offer;
 
 public sealed record PhotoOfferDto(
     string Id,

@@ -1,4 +1,4 @@
-namespace PSP.Domain.Models;
+namespace PSP.Domain.Models.Common;
 
 public sealed record PaginatedResultDto<T>(
     IReadOnlyList<T> Items,

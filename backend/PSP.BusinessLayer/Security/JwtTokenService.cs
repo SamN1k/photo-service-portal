@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using PSP.BusinessLayer.Interfaces;
 using PSP.Domain.Entities;
-using PSP.Domain.Models;
+using PSP.Domain.Models.Auth;
 
 namespace PSP.BusinessLayer.Security;
 

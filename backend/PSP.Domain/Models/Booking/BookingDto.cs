@@ -1,4 +1,4 @@
-namespace PSP.Domain.Models;
+namespace PSP.Domain.Models.Booking;
 
 public sealed record BookingDto(
     string Id,

@@ -1,4 +1,5 @@
-using PSP.Domain.Models;
+using PSP.Domain.Models.Auth;
+using PSP.Domain.Models.User;
 
 namespace PSP.BusinessLayer.Interfaces;
 

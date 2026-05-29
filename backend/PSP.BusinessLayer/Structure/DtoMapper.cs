@@ -1,5 +1,8 @@
-using PSP.Domain.Models;
 using PSP.Domain.Entities;
+using PSP.Domain.Models.Booking;
+using PSP.Domain.Models.Offer;
+using PSP.Domain.Models.ProblemReport;
+using PSP.Domain.Models.User;
 
 namespace PSP.BusinessLayer.Structure;
 

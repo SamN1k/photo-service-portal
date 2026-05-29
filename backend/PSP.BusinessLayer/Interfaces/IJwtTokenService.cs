@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using PSP.Domain.Entities;
-using PSP.Domain.Models;
+using PSP.Domain.Models.Auth;
 
 namespace PSP.BusinessLayer.Interfaces;
 

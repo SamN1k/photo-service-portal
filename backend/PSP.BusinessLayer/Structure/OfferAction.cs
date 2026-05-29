@@ -2,13 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
 using PSP.DataAccessLayer.Context;
 using PSP.Domain.Entities;
-using PSP.Domain.Models;
+using PSP.Domain.Models.Common;
+using PSP.Domain.Models.Offer;
 
 namespace PSP.BusinessLayer.Structure;
 
 public class OfferAction
 {
     private const string DefaultCoverImageUrl = "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=900&q=80";
+    private readonly PhotoPortalDbContext db;
 
     private static readonly HashSet<string> Categories = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -25,10 +27,13 @@ public class OfferAction
         "archived"
     };
 
+    public OfferAction()
+    {
+        db = new PhotoPortalDbContext();
+    }
+
     protected async Task<PaginatedResultDto<PhotoOfferDto>> ListOffersActionAsync(OfferListQueryDto query)
     {
-        using var db = new PhotoPortalDbContext();
-
         if (query.ForceError || string.Equals(query.Query?.Trim(), "eroare", StringComparison.OrdinalIgnoreCase))
         {
             throw new BusinessException(500, "Serviciul API pentru oferte a esuat.");
@@ -80,7 +85,6 @@ public class OfferAction
 
     protected async Task<PhotoOfferDto> GetOfferActionAsync(string offerId)
     {
-        using var db = new PhotoPortalDbContext();
         var offer = await db.Offers.AsNoTracking().FirstOrDefaultAsync(candidate => candidate.Id == offerId)
             ?? throw new BusinessException(404, "Oferta nu exista.");
 
@@ -89,7 +93,6 @@ public class OfferAction
 
     protected async Task<PhotoOfferDto> CreateOfferActionAsync(CreateOfferDto input)
     {
-        using var db = new PhotoPortalDbContext();
         var normalizedInput = NormalizeInput(new OfferInputDto(
             input.Title,
             input.Description,
@@ -131,9 +134,8 @@ public class OfferAction
 
     protected async Task<PhotoOfferDto> UpdateOfferActionAsync(string offerId, OfferInputDto input)
     {
-        using var db = new PhotoPortalDbContext();
         var normalizedInput = NormalizeInput(input);
-        var offer = await FindOfferAsync(db, offerId);
+        var offer = await FindOfferAsync(offerId);
 
         offer.Title = normalizedInput.Title;
         offer.Description = normalizedInput.Description;
@@ -152,14 +154,13 @@ public class OfferAction
 
     protected async Task DeleteOfferActionAsync(string offerId)
     {
-        using var db = new PhotoPortalDbContext();
-        var offer = await FindOfferAsync(db, offerId);
+        var offer = await FindOfferAsync(offerId);
 
         db.Offers.Remove(offer);
         await db.SaveChangesAsync();
     }
 
-    private static async Task<PhotoOfferEntity> FindOfferAsync(PhotoPortalDbContext db, string offerId)
+    private async Task<PhotoOfferEntity> FindOfferAsync(string offerId)
     {
         return await db.Offers.FirstOrDefaultAsync(candidate => candidate.Id == offerId)
             ?? throw new BusinessException(404, "Oferta nu exista.");

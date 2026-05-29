@@ -3,13 +3,15 @@ using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Security;
 using PSP.DataAccessLayer.Context;
 using PSP.Domain.Entities;
-using PSP.Domain.Models;
+using PSP.Domain.Models.Common;
+using PSP.Domain.Models.User;
 
 namespace PSP.BusinessLayer.Structure;
 
 public class UserAction
 {
     private const int MaxPortfolioGalleryImages = 12;
+    private readonly PhotoPortalDbContext db;
     private readonly Pbkdf2PasswordHasher passwordHasher = new();
 
     private static readonly HashSet<string> Roles = new(StringComparer.OrdinalIgnoreCase)
@@ -26,10 +28,13 @@ public class UserAction
         "suspended"
     };
 
+    public UserAction()
+    {
+        db = new PhotoPortalDbContext();
+    }
+
     protected async Task<PaginatedResultDto<UserDto>> ListUsersActionAsync(UserListQueryDto query)
     {
-        using var db = new PhotoPortalDbContext();
-
         if (query.ForceError || string.Equals(query.Query?.Trim(), "eroare", StringComparison.OrdinalIgnoreCase))
         {
             throw new BusinessException(500, "Serviciul API pentru utilizatori a esuat.");
@@ -65,7 +70,6 @@ public class UserAction
 
     protected async Task<UserDto> CreateUserActionAsync(UserInputDto input)
     {
-        using var db = new PhotoPortalDbContext();
         var fullName = NormalizeRequired(input.FullName, "Numele utilizatorului este obligatoriu.");
         var email = NormalizeEmail(input.Email);
         var role = NormalizeAllowed(input.Role, Roles, "Rolul utilizatorului este invalid.");
@@ -97,13 +101,12 @@ public class UserAction
 
     protected async Task<UserDto> UpdateUserActionAsync(string userId, UserInputDto input)
     {
-        using var db = new PhotoPortalDbContext();
         var fullName = NormalizeRequired(input.FullName, "Numele utilizatorului este obligatoriu.");
         var email = NormalizeEmail(input.Email);
         var role = NormalizeAllowed(input.Role, Roles, "Rolul utilizatorului este invalid.");
         var status = NormalizeAllowed(input.Status, Statuses, "Statusul utilizatorului este invalid.");
 
-        var user = await FindUserAsync(db, userId);
+        var user = await FindUserAsync(userId);
         var emailIsUsed = await db.Users.AnyAsync(candidate => candidate.Id != userId && candidate.Email == email);
 
         if (emailIsUsed)
@@ -128,7 +131,6 @@ public class UserAction
 
     protected async Task<UserDto> UpdateAccountSettingsActionAsync(string userId, AccountSettingsInputDto input)
     {
-        using var db = new PhotoPortalDbContext();
         var fullName = NormalizeRequired(input.FullName, "Numele utilizatorului este obligatoriu.");
         var email = NormalizeEmail(input.Email);
         var currentPassword = NormalizeRequired(input.CurrentPassword, "Parola curenta este obligatorie.");
@@ -139,7 +141,7 @@ public class UserAction
             throw new BusinessException(422, "Parola noua trebuie sa aiba minimum 6 caractere.");
         }
 
-        var user = await FindUserAsync(db, userId);
+        var user = await FindUserAsync(userId);
 
         if (!passwordHasher.Verify(currentPassword, user.Password))
         {
@@ -168,15 +170,13 @@ public class UserAction
 
     protected async Task<PhotographerPortfolioDto> GetPhotographerPortfolioActionAsync(string photographerId)
     {
-        using var db = new PhotoPortalDbContext();
-        var photographer = await FindPhotographerAsync(db, photographerId);
+        var photographer = await FindPhotographerAsync(photographerId);
         return DtoMapper.ToPortfolioDto(photographer);
     }
 
     protected async Task<PhotographerPortfolioDto> UpdatePhotographerPortfolioActionAsync(string photographerId, PhotographerPortfolioInputDto input)
     {
-        using var db = new PhotoPortalDbContext();
-        var photographer = await FindPhotographerAsync(db, photographerId);
+        var photographer = await FindPhotographerAsync(photographerId);
         var fullName = NormalizeRequired(input.FullName, "Numele fotografului este obligatoriu.");
         var email = NormalizeEmail(input.Email);
         var emailIsUsed = await db.Users.AnyAsync(candidate => candidate.Id != photographerId && candidate.Email == email);
@@ -200,8 +200,7 @@ public class UserAction
 
     protected async Task DeleteUserActionAsync(string userId)
     {
-        using var db = new PhotoPortalDbContext();
-        var user = await FindUserAsync(db, userId);
+        var user = await FindUserAsync(userId);
         var relatedBookings = await db.Bookings
             .Where(booking => booking.ClientId == userId || booking.PhotographerId == userId)
             .ToListAsync();
@@ -216,15 +215,15 @@ public class UserAction
         await db.SaveChangesAsync();
     }
 
-    private static async Task<UserEntity> FindUserAsync(PhotoPortalDbContext db, string userId)
+    private async Task<UserEntity> FindUserAsync(string userId)
     {
         return await db.Users.FirstOrDefaultAsync(candidate => candidate.Id == userId)
             ?? throw new BusinessException(404, "Utilizatorul nu exista.");
     }
 
-    private static async Task<UserEntity> FindPhotographerAsync(PhotoPortalDbContext db, string photographerId)
+    private async Task<UserEntity> FindPhotographerAsync(string photographerId)
     {
-        var user = await FindUserAsync(db, photographerId);
+        var user = await FindUserAsync(photographerId);
 
         if (!string.Equals(user.Role, "photographer", StringComparison.OrdinalIgnoreCase))
         {

@@ -1,4 +1,5 @@
-using PSP.Domain.Models;
+using PSP.Domain.Models.Common;
+using PSP.Domain.Models.Offer;
 
 namespace PSP.BusinessLayer.Interfaces;
 

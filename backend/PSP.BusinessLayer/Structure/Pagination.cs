@@ -1,4 +1,4 @@
-using PSP.Domain.Models;
+using PSP.Domain.Models.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace PSP.BusinessLayer.Structure;

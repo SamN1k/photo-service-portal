@@ -1,6 +1,7 @@
 using PSP.BusinessLayer.Structure;
 using PSP.BusinessLayer.Interfaces;
-using PSP.Domain.Models;
+using PSP.Domain.Models.Booking;
+using PSP.Domain.Models.Common;
 
 namespace PSP.BusinessLayer.Core;
 

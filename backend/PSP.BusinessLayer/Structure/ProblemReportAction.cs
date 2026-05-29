@@ -2,12 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
 using PSP.DataAccessLayer.Context;
 using PSP.Domain.Entities;
-using PSP.Domain.Models;
+using PSP.Domain.Models.Common;
+using PSP.Domain.Models.ProblemReport;
 
 namespace PSP.BusinessLayer.Structure;
 
 public class ProblemReportAction
 {
+    private readonly PhotoPortalDbContext db;
+
     private static readonly HashSet<string> ReporterRoles = new(StringComparer.OrdinalIgnoreCase)
     {
         "user",
@@ -19,6 +22,11 @@ public class ProblemReportAction
         "new",
         "reviewed"
     };
+
+    public ProblemReportAction()
+    {
+        db = new PhotoPortalDbContext();
+    }
 
     protected async Task<PaginatedResultDto<ProblemReportDto>> ListReportsActionAsync(ProblemReportListQueryDto query)
     {
@@ -33,8 +41,6 @@ public class ProblemReportAction
 
     private async Task<PaginatedResultDto<ProblemReportDto>> ListReportsCoreAsync(ProblemReportListQueryDto query, string? reporterId)
     {
-        using var db = new PhotoPortalDbContext();
-
         if (query.ForceError || string.Equals(query.Query?.Trim(), "eroare", StringComparison.OrdinalIgnoreCase))
         {
             throw new BusinessException(500, "Serviciul API pentru reporturi a esuat.");
@@ -77,7 +83,6 @@ public class ProblemReportAction
 
     protected async Task<ProblemReportDto> CreateReportActionAsync(string reporterId, ProblemReportInputDto input)
     {
-        using var db = new PhotoPortalDbContext();
         var reporter = await db.Users.AsNoTracking().FirstOrDefaultAsync(user => user.Id == reporterId)
             ?? throw new BusinessException(404, "Utilizatorul autentificat nu exista.");
 
@@ -130,7 +135,6 @@ public class ProblemReportAction
 
     protected async Task<ProblemReportDto> UpdateReportStatusActionAsync(string reportId, ProblemReportStatusUpdateDto input)
     {
-        using var db = new PhotoPortalDbContext();
         var status = NormalizeAllowed(input.Status, Statuses, "Statusul reportului este invalid.");
         var report = await db.ProblemReports.FirstOrDefaultAsync(candidate => candidate.Id == reportId)
             ?? throw new BusinessException(404, "Reportul nu exista.");

@@ -1,4 +1,4 @@
-namespace PSP.Domain.Models;
+namespace PSP.Domain.Models.User;
 
 public sealed record PhotographerPortfolioInputDto(
     string FullName,

@@ -4,7 +4,7 @@ using Microsoft.OpenApi.Models;
 using PSP.BusinessLayer.Security;
 using PSP.DataAccessLayer;
 using PSP.DataAccessLayer.Context;
-using PSP.Domain.Models;
+using PSP.Domain.Models.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 

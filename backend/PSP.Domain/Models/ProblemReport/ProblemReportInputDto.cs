@@ -1,4 +1,4 @@
-namespace PSP.Domain.Models;
+namespace PSP.Domain.Models.ProblemReport;
 
 public sealed record ProblemReportInputDto(
     string Title,

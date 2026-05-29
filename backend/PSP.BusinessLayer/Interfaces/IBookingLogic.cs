@@ -1,4 +1,5 @@
-using PSP.Domain.Models;
+using PSP.Domain.Models.Booking;
+using PSP.Domain.Models.Common;
 
 namespace PSP.BusinessLayer.Interfaces;
 
