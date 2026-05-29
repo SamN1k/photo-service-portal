@@ -186,11 +186,29 @@ public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControll
 
         if (CurrentUserIsPhotographer && IsCurrentUser(booking.PhotographerId))
         {
-            return true;
+            return CanPhotographerUpdateBookingStatus(booking.Status, status);
         }
 
         return CurrentUserIsUser &&
             IsCurrentUser(booking.ClientId) &&
+            string.Equals(booking.Status, "confirmed", StringComparison.OrdinalIgnoreCase) &&
             string.Equals(status, "paid", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool CanPhotographerUpdateBookingStatus(string currentStatus, string nextStatus)
+    {
+        if (string.Equals(currentStatus, "pending", StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Equals(nextStatus, "confirmed", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(nextStatus, "rejected", StringComparison.OrdinalIgnoreCase);
+        }
+
+        if (string.Equals(currentStatus, "confirmed", StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Equals(nextStatus, "rejected", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return string.Equals(currentStatus, "paid", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(nextStatus, "finalized", StringComparison.OrdinalIgnoreCase);
     }
 }

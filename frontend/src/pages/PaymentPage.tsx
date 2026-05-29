@@ -122,7 +122,7 @@ const PaymentPage = () => {
     const handleConfirmPayment = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        if (!booking || booking.status === 'rejected' || booking.status === 'finalized' || booking.status === 'paid') {
+        if (!booking || booking.status !== 'confirmed') {
             return;
         }
 
@@ -145,8 +145,9 @@ const PaymentPage = () => {
         }
     };
 
-    const isPaymentUnavailable = booking?.status === 'rejected' || booking?.status === 'finalized';
     const isAlreadyPaid = booking?.status === 'paid';
+    const canPay = booking?.status === 'confirmed';
+    const isPaymentUnavailable = Boolean(booking && !canPay && !isAlreadyPaid);
 
     return (
         <div className="space-y-6">
@@ -294,7 +295,7 @@ const PaymentPage = () => {
 
                             {isPaymentUnavailable && (
                                 <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-800">
-                                    Oferta nu poate fi achitata in acest status.
+                                    Cererea trebuie confirmata de fotograf inainte de achitare.
                                 </p>
                             )}
 
@@ -311,7 +312,7 @@ const PaymentPage = () => {
                             <div className="mt-5 flex flex-wrap gap-3">
                                 <button
                                     type="submit"
-                                    disabled={isProcessing || isPaymentUnavailable || isAlreadyPaid}
+                                    disabled={isProcessing || !canPay || isAlreadyPaid}
                                     className="rounded-lg bg-emerald-200 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     {isProcessing ? 'Se proceseaza...' : 'Confirma plata'}

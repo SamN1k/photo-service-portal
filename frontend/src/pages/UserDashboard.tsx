@@ -61,7 +61,7 @@ const statusTone: Record<BookingStatus, 'success' | 'warning' | 'danger' | 'neut
     finalized: 'neutral',
 };
 
-const canPayBooking = (status: BookingStatus) => !['rejected', 'paid', 'finalized'].includes(status);
+const canPayBooking = (status: BookingStatus) => status === 'confirmed';
 
 const UserDashboard = () => {
     const { user } = useAuth();
@@ -455,6 +455,11 @@ const UserDashboard = () => {
                                                 >
                                                     Mergi spre achitare
                                                 </Link>
+                                            )}
+                                            {booking.status === 'pending' && (
+                                                <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
+                                                    Asteapta confirmarea
+                                                </span>
                                             )}
                                             <button
                                                 type="button"
