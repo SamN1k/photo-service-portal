@@ -67,6 +67,7 @@ builder.Services.AddScoped<IAuthLogic, AuthLogic>();
 builder.Services.AddScoped<IUserLogic, UserLogic>();
 builder.Services.AddScoped<IOfferLogic, OfferLogic>();
 builder.Services.AddScoped<IBookingLogic, BookingLogic>();
+builder.Services.AddScoped<IProblemReportLogic, ProblemReportLogic>();
 
 // JWT Authentication / RBAC
 builder.Services

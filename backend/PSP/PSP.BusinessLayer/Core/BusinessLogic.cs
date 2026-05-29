@@ -35,6 +35,11 @@ public sealed class BusinessLogic(
         return new BookingLogic(db);
     }
 
+    public IProblemReportLogic GetProblemReportLogic()
+    {
+        return new ProblemReportLogic(db);
+    }
+
     public IAuthLogic GetAuthLogic()
     {
         return new AuthLogic(db, emailSender, passwordHasher, jwtTokenService);

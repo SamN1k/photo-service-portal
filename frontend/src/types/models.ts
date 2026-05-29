@@ -62,6 +62,25 @@ export interface PasswordResetCompletePayload {
     newPassword: string;
 }
 
+export type ProblemReportStatus = 'new' | 'reviewed';
+
+export interface ProblemReport {
+    id: string;
+    reporterId: string;
+    reporterName: string;
+    reporterEmail: string;
+    reporterRole: UserRole;
+    title: string;
+    description: string;
+    status: ProblemReportStatus;
+    createdAt: string;
+}
+
+export interface ProblemReportInput {
+    title: string;
+    description: string;
+}
+
 export interface PhotographerPortfolio {
     photographerId: string;
     fullName: string;

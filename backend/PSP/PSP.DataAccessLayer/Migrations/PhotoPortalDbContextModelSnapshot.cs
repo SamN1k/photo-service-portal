@@ -175,6 +175,63 @@ namespace PSP.DataAccessLayer.Migrations
                     b.ToTable("PhotoOffers", (string)null);
                 });
 
+            modelBuilder.Entity("PSP.Domain.Entities.ProblemReportEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("ReporterEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("ReporterId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("ReporterName")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("ReporterRole")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("ReporterId");
+
+                    b.HasIndex("ReporterRole");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("ProblemReports", (string)null);
+                });
+
             modelBuilder.Entity("PSP.Domain.Entities.UserEntity", b =>
                 {
                     b.Property<string>("Id")
@@ -269,6 +326,15 @@ namespace PSP.DataAccessLayer.Migrations
                     b.HasOne("PSP.Domain.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("PhotographerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PSP.Domain.Entities.ProblemReportEntity", b =>
+                {
+                    b.HasOne("PSP.Domain.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

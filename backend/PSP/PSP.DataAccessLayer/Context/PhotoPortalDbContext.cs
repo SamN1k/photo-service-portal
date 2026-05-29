@@ -8,12 +8,14 @@ public sealed class PhotoPortalDbContext(DbContextOptions<PhotoPortalDbContext> 
     public DbSet<UserEntity> Users => Set<UserEntity>();
     public DbSet<PhotoOfferEntity> Offers => Set<PhotoOfferEntity>();
     public DbSet<BookingEntity> Bookings => Set<BookingEntity>();
+    public DbSet<ProblemReportEntity> ProblemReports => Set<ProblemReportEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ConfigureUsers(modelBuilder);
         ConfigureOffers(modelBuilder);
         ConfigureBookings(modelBuilder);
+        ConfigureProblemReports(modelBuilder);
     }
 
     private static void ConfigureUsers(ModelBuilder modelBuilder)
@@ -102,6 +104,33 @@ public sealed class PhotoPortalDbContext(DbContextOptions<PhotoPortalDbContext> 
             .HasOne<UserEntity>()
             .WithMany()
             .HasForeignKey(booking => booking.PhotographerId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+
+    private static void ConfigureProblemReports(ModelBuilder modelBuilder)
+    {
+        var entity = modelBuilder.Entity<ProblemReportEntity>();
+
+        entity.ToTable("ProblemReports");
+        entity.HasKey(report => report.Id);
+        entity.Property(report => report.Id).HasMaxLength(64);
+        entity.Property(report => report.ReporterId).HasMaxLength(64).IsRequired();
+        entity.Property(report => report.ReporterName).HasMaxLength(160).IsRequired();
+        entity.Property(report => report.ReporterEmail).HasMaxLength(256).IsRequired();
+        entity.Property(report => report.ReporterRole).HasMaxLength(32).IsRequired();
+        entity.Property(report => report.Title).HasMaxLength(160).IsRequired();
+        entity.Property(report => report.Description).HasMaxLength(4000).IsRequired();
+        entity.Property(report => report.Status).HasMaxLength(32).IsRequired();
+
+        entity.HasIndex(report => report.ReporterId);
+        entity.HasIndex(report => report.ReporterRole);
+        entity.HasIndex(report => report.Status);
+        entity.HasIndex(report => report.CreatedAt);
+
+        entity
+            .HasOne<UserEntity>()
+            .WithMany()
+            .HasForeignKey(report => report.ReporterId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

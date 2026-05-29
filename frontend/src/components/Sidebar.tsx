@@ -6,7 +6,7 @@ interface NavItem {
     name: string;
     path: string;
     roles: UserRole[];
-    variant?: 'default' | 'result';
+    variant?: 'default' | 'result' | 'danger';
 }
 
 const navItems: NavItem[] = [
@@ -14,10 +14,12 @@ const navItems: NavItem[] = [
     { name: 'Ofertele mele', path: PATHS.PHOTOGRAPHER_DASHBOARD, roles: ['photographer'] },
     { name: 'Setari portofoliu', path: PATHS.PHOTOGRAPHER_PORTFOLIO_SETTINGS, roles: ['photographer'] },
     { name: 'Administrare', path: PATHS.ADMIN_PANEL, roles: ['admin'] },
+    { name: 'Analiza problemelor', path: PATHS.ADMIN_REPORTS, roles: ['admin'], variant: 'danger' },
     { name: 'Catalog oferte', path: PATHS.OFFERS, roles: ['user', 'photographer', 'admin'] },
     { name: 'Setari cont', path: PATHS.ACCOUNT_SETTINGS, roles: ['user', 'photographer', 'admin'] },
     { name: 'Vizualizeaza rezultatele', path: PATHS.USER_RESULTS, roles: ['user'], variant: 'result' },
     { name: 'Incarca rezultate', path: PATHS.PHOTOGRAPHER_RESULTS, roles: ['photographer'], variant: 'result' },
+    { name: 'Raporteaza o problema', path: PATHS.REPORT_PROBLEM, roles: ['user', 'photographer'], variant: 'danger' },
 ];
 
 const linkClassName = (variant: NavItem['variant'] = 'default') => {
@@ -25,6 +27,12 @@ const linkClassName = (variant: NavItem['variant'] = 'default') => {
         if (variant === 'result') {
             return `rounded-lg border border-sky-200 px-3 py-2 text-sm font-semibold transition ${
                 isActive ? 'bg-sky-600 text-white' : 'bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-900'
+            }`;
+        }
+
+        if (variant === 'danger') {
+            return `rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold transition ${
+                isActive ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 hover:text-rose-900'
             }`;
         }
 
