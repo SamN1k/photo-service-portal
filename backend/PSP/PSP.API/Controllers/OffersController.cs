@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
@@ -10,10 +11,12 @@ namespace PSP.API.Controllers;
 public sealed class OffersController(IOfferLogic offerLogic) : ApiControllerBase
 {
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<PaginatedResultDto<PhotoOfferDto>>> ListOffers([FromQuery] OfferListQueryDto filters)
     {
         try
         {
+            ScopeOfferFilters(filters);
             return Ok(await offerLogic.ListOffersAsync(filters));
         }
         catch (BusinessException exception)
@@ -27,11 +30,19 @@ public sealed class OffersController(IOfferLogic offerLogic) : ApiControllerBase
     }
 
     [HttpGet("{offerId}")]
+    [AllowAnonymous]
     public async Task<ActionResult<PhotoOfferDto>> GetOffer(string offerId)
     {
         try
         {
-            return Ok(await offerLogic.GetOfferAsync(offerId));
+            var offer = await offerLogic.GetOfferAsync(offerId);
+
+            if (offer.Status != "active" && !CanManageOffer(offer))
+            {
+                return User.Identity?.IsAuthenticated == true ? Forbid() : Unauthorized();
+            }
+
+            return Ok(offer);
         }
         catch (BusinessException exception)
         {
@@ -44,8 +55,14 @@ public sealed class OffersController(IOfferLogic offerLogic) : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "photographer,admin")]
     public async Task<ActionResult<PhotoOfferDto>> CreateOffer([FromBody] CreateOfferDto input)
     {
+        if (!CurrentUserIsAdmin && !IsCurrentUser(input.PhotographerId))
+        {
+            return Forbid();
+        }
+
         try
         {
             var offer = await offerLogic.CreateOfferAsync(input);
@@ -62,10 +79,18 @@ public sealed class OffersController(IOfferLogic offerLogic) : ApiControllerBase
     }
 
     [HttpPut("{offerId}")]
+    [Authorize(Roles = "photographer,admin")]
     public async Task<ActionResult<PhotoOfferDto>> UpdateOffer(string offerId, [FromBody] OfferInputDto input)
     {
         try
         {
+            var offer = await offerLogic.GetOfferAsync(offerId);
+
+            if (!CanManageOffer(offer))
+            {
+                return Forbid();
+            }
+
             return Ok(await offerLogic.UpdateOfferAsync(offerId, input));
         }
         catch (BusinessException exception)
@@ -79,10 +104,18 @@ public sealed class OffersController(IOfferLogic offerLogic) : ApiControllerBase
     }
 
     [HttpDelete("{offerId}")]
+    [Authorize(Roles = "photographer,admin")]
     public async Task<IActionResult> DeleteOffer(string offerId)
     {
         try
         {
+            var offer = await offerLogic.GetOfferAsync(offerId);
+
+            if (!CanManageOffer(offer))
+            {
+                return Forbid();
+            }
+
             await offerLogic.DeleteOfferAsync(offerId);
             return NoContent();
         }
@@ -94,5 +127,24 @@ public sealed class OffersController(IOfferLogic offerLogic) : ApiControllerBase
         {
             return FromDatabaseException(exception);
         }
+    }
+
+    private void ScopeOfferFilters(OfferListQueryDto filters)
+    {
+        if (filters.PublicOnly || User.Identity?.IsAuthenticated != true || CurrentUserIsUser)
+        {
+            filters.PublicOnly = true;
+            return;
+        }
+
+        if (CurrentUserIsPhotographer && !CurrentUserIsAdmin)
+        {
+            filters.PhotographerId = CurrentUserId;
+        }
+    }
+
+    private bool CanManageOffer(PhotoOfferDto offer)
+    {
+        return CurrentUserIsAdmin || (CurrentUserIsPhotographer && IsCurrentUser(offer.PhotographerId));
     }
 }

@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import AccountSettingsPage from '../pages/AccountSettingsPage';
+import AdminReportsPage from '../pages/AdminReportsPage';
 import AdminPanel from '../pages/AdminPanel';
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
@@ -9,6 +10,7 @@ import PhotographerDashboard from '../pages/PhotographerDashboard';
 import PhotographerPortfolioPage from '../pages/PhotographerPortfolioPage';
 import PhotographerPortfolioSettingsPage from '../pages/PhotographerPortfolioSettingsPage';
 import PhotographerResultsPage from '../pages/PhotographerResultsPage';
+import ProblemReportPage from '../pages/ProblemReportPage';
 import SignUpPage from '../pages/SignUpPage';
 import UserDashboard from '../pages/UserDashboard';
 import UserResultsPage from '../pages/UserResultsPage';
@@ -46,6 +48,15 @@ export const router = createBrowserRouter([
         ],
     },
     {
+        element: <AuthGuard allowedRoles={['user', 'photographer']} />,
+        children: [
+            {
+                element: <DashboardLayout />,
+                children: [{ path: PATHS.REPORT_PROBLEM, element: <ProblemReportPage /> }],
+            },
+        ],
+    },
+    {
         element: <AuthGuard allowedRoles={['photographer']} />,
         children: [
             {
@@ -63,7 +74,10 @@ export const router = createBrowserRouter([
         children: [
             {
                 element: <DashboardLayout />,
-                children: [{ path: PATHS.ADMIN_PANEL, element: <AdminPanel /> }],
+                children: [
+                    { path: PATHS.ADMIN_PANEL, element: <AdminPanel /> },
+                    { path: PATHS.ADMIN_REPORTS, element: <AdminReportsPage /> },
+                ],
             },
         ],
     },

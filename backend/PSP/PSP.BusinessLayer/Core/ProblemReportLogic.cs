@@ -4,5 +4,5 @@ using PSP.DataAccessLayer.Context;
 
 namespace PSP.BusinessLayer.Core;
 
-public sealed class UserLogic(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
-    : UserAction(db, passwordHasher), IUserLogic;
+public sealed class ProblemReportLogic(PhotoPortalDbContext db)
+    : ProblemReportAction(db), IProblemReportLogic;

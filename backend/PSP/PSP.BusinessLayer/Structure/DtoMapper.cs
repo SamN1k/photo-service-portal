@@ -73,6 +73,20 @@ internal static class DtoMapper
             booking.UpdatedAt);
     }
 
+    public static ProblemReportDto ToDto(ProblemReportEntity report)
+    {
+        return new ProblemReportDto(
+            report.Id,
+            report.ReporterId,
+            report.ReporterName,
+            report.ReporterEmail,
+            report.ReporterRole,
+            report.Title,
+            report.Description,
+            report.Status,
+            report.CreatedAt);
+    }
+
     private static IReadOnlyList<string> SplitGallery(string? galleryImageUrls)
     {
         if (string.IsNullOrWhiteSpace(galleryImageUrls))

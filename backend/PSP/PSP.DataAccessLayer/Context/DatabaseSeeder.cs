@@ -6,6 +6,8 @@ namespace PSP.DataAccessLayer.Context;
 
 public static class DatabaseSeeder
 {
+    private const string DemoPasswordHash = "pbkdf2:v1:100000:LM0YVKNSVJNj3A7fl1EOFQ==:dj/nutQCOIxnpbo/eoisRD5ISDaKCfssxNF/JrmzTQ8=";
+
     public static async Task SeedAsync(PhotoPortalDbContext context)
     {
         if (await context.Users.AnyAsync())
@@ -29,7 +31,7 @@ public static class DatabaseSeeder
                 Id = "user-001",
                 FullName = "Maria Popescu",
                 Email = "user@demo.local",
-                Password = "demo1234",
+                Password = DemoPasswordHash,
                 Role = "user",
                 Status = "active",
                 PhoneNumber = "",
@@ -46,7 +48,7 @@ public static class DatabaseSeeder
                 Id = "photo-001",
                 FullName = "Radu Ionescu",
                 Email = "photographer@demo.local",
-                Password = "demo1234",
+                Password = DemoPasswordHash,
                 Role = "photographer",
                 Status = "active",
                 PhoneNumber = "+373 69 145 802",
@@ -69,7 +71,7 @@ public static class DatabaseSeeder
                 Id = "admin-001",
                 FullName = "Ioana Avram",
                 Email = "admin@demo.local",
-                Password = "demo1234",
+                Password = DemoPasswordHash,
                 Role = "admin",
                 Status = "active",
                 PhoneNumber = "",
@@ -86,7 +88,7 @@ public static class DatabaseSeeder
                 Id = "user-002",
                 FullName = "Victor Mihai",
                 Email = "victor@demo.local",
-                Password = "demo1234",
+                Password = DemoPasswordHash,
                 Role = "user",
                 Status = "suspended",
                 PhoneNumber = "",
@@ -103,7 +105,7 @@ public static class DatabaseSeeder
                 Id = "photo-002",
                 FullName = "Elena Stan",
                 Email = "elena@demo.local",
-                Password = "demo1234",
+                Password = DemoPasswordHash,
                 Role = "photographer",
                 Status = "pending",
                 PhoneNumber = "+40 744 332 118",

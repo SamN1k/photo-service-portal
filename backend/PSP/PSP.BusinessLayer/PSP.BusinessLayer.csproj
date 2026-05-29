@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\PSP.DataAccessLayer\PSP.DataAccessLayer.csproj"/>
         <ProjectReference Include="..\PSP.Domain\PSP.Domain.csproj"/>
     </ItemGroup>

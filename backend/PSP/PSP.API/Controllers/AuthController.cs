@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
@@ -10,6 +11,7 @@ namespace PSP.API.Controllers;
 public sealed class AuthController(IAuthLogic authLogic) : ApiControllerBase
 {
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<ActionResult<AuthSessionDto>> Login([FromBody] LoginCredentialsDto credentials)
     {
         try
@@ -27,6 +29,7 @@ public sealed class AuthController(IAuthLogic authLogic) : ApiControllerBase
     }
 
     [HttpPost("signup")]
+    [AllowAnonymous]
     public async Task<ActionResult<AuthSessionDto>> SignUp([FromBody] SignUpPayloadDto payload)
     {
         try
@@ -45,6 +48,7 @@ public sealed class AuthController(IAuthLogic authLogic) : ApiControllerBase
     }
 
     [HttpPost("password-reset/request")]
+    [AllowAnonymous]
     public async Task<ActionResult<PasswordResetRequestResultDto>> RequestPasswordReset([FromBody] PasswordResetRequestDto payload)
     {
         try
@@ -62,6 +66,7 @@ public sealed class AuthController(IAuthLogic authLogic) : ApiControllerBase
     }
 
     [HttpPost("password-reset/verify")]
+    [AllowAnonymous]
     public async Task<ActionResult<PasswordResetCodeResultDto>> VerifyPasswordResetCode([FromBody] PasswordResetCodeDto payload)
     {
         try
@@ -79,6 +84,7 @@ public sealed class AuthController(IAuthLogic authLogic) : ApiControllerBase
     }
 
     [HttpPost("password-reset/complete")]
+    [AllowAnonymous]
     public async Task<ActionResult<UserDto>> CompletePasswordReset([FromBody] PasswordResetCompleteDto payload)
     {
         try
@@ -96,6 +102,7 @@ public sealed class AuthController(IAuthLogic authLogic) : ApiControllerBase
     }
 
     [HttpGet("demo-accounts")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<IReadOnlyList<DemoAccountDto>>> GetDemoAccounts()
     {
         try

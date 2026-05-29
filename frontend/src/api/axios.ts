@@ -11,6 +11,7 @@ interface ApiErrorResponse {
 type GlobalApiErrorHandler = (error: MockHttpError) => void;
 
 const SESSION_KEY = 'photoPortal.session';
+const SESSION_EXPIRED_EVENT = 'photoPortal.sessionExpired';
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5280/api';
 const USES_NGROK_TUNNEL = (() => {
     try {
@@ -35,6 +36,11 @@ const readSessionToken = (): string | null => {
     } catch {
         return null;
     }
+};
+
+const clearStoredSession = () => {
+    window.localStorage.removeItem(SESSION_KEY);
+    window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
 };
 
 const messageByStatus = (status: number): string => {
@@ -97,6 +103,11 @@ apiClient.interceptors.response.use(
     (response) => response,
     (error: AxiosError<ApiErrorResponse>) => {
         const httpError = toHttpError(error);
+
+        if (httpError.status === 401) {
+            clearStoredSession();
+        }
+
         globalApiErrorHandler?.(httpError);
         return Promise.reject(httpError);
     },

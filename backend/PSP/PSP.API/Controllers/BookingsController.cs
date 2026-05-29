@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
@@ -7,14 +8,16 @@ using PSP.Domain.Models;
 namespace PSP.API.Controllers;
 
 [Route("api/bookings")]
+[Authorize]
 public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<PaginatedResultDto<BookingDto>>> ListBookings([FromQuery] BookingListQueryDto query)
+    public async Task<ActionResult<PaginatedResultDto<BookingDto>>> ListBookings([FromQuery] BookingListQueryDto filters)
     {
         try
         {
-            return Ok(await bookingLogic.ListBookingsAsync(query));
+            ScopeBookingFilters(filters);
+            return Ok(await bookingLogic.ListBookingsAsync(filters));
         }
         catch (BusinessException exception)
         {
@@ -31,7 +34,14 @@ public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControll
     {
         try
         {
-            return Ok(await bookingLogic.GetBookingAsync(bookingId));
+            var booking = await bookingLogic.GetBookingAsync(bookingId);
+
+            if (!CanAccessBooking(booking))
+            {
+                return Forbid();
+            }
+
+            return Ok(booking);
         }
         catch (BusinessException exception)
         {
@@ -44,8 +54,14 @@ public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControll
     }
 
     [HttpPost]
+    [Authorize(Roles = "user,admin")]
     public async Task<ActionResult<BookingDto>> CreateBooking([FromBody] CreateBookingDto input)
     {
+        if (!CurrentUserIsAdmin && !IsCurrentUser(input.ClientId))
+        {
+            return Forbid();
+        }
+
         try
         {
             var booking = await bookingLogic.CreateBookingAsync(input);
@@ -62,10 +78,18 @@ public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControll
     }
 
     [HttpPut("{bookingId}")]
+    [Authorize(Roles = "user,admin")]
     public async Task<ActionResult<BookingDto>> UpdateBooking(string bookingId, [FromBody] BookingInputDto input)
     {
         try
         {
+            var booking = await bookingLogic.GetBookingAsync(bookingId);
+
+            if (!CurrentUserIsAdmin && !IsCurrentUser(booking.ClientId))
+            {
+                return Forbid();
+            }
+
             return Ok(await bookingLogic.UpdateBookingAsync(bookingId, input));
         }
         catch (BusinessException exception)
@@ -83,6 +107,13 @@ public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControll
     {
         try
         {
+            var booking = await bookingLogic.GetBookingAsync(bookingId);
+
+            if (!CanUpdateBookingStatus(booking, input.Status))
+            {
+                return Forbid();
+            }
+
             return Ok(await bookingLogic.UpdateBookingStatusAsync(bookingId, input));
         }
         catch (BusinessException exception)
@@ -96,10 +127,18 @@ public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControll
     }
 
     [HttpDelete("{bookingId}")]
+    [Authorize(Roles = "user,admin")]
     public async Task<IActionResult> DeleteBooking(string bookingId)
     {
         try
         {
+            var booking = await bookingLogic.GetBookingAsync(bookingId);
+
+            if (!CurrentUserIsAdmin && !IsCurrentUser(booking.ClientId))
+            {
+                return Forbid();
+            }
+
             await bookingLogic.DeleteBookingAsync(bookingId);
             return NoContent();
         }
@@ -111,5 +150,47 @@ public sealed class BookingsController(IBookingLogic bookingLogic) : ApiControll
         {
             return FromDatabaseException(exception);
         }
+    }
+
+    private void ScopeBookingFilters(BookingListQueryDto filters)
+    {
+        if (CurrentUserIsAdmin)
+        {
+            return;
+        }
+
+        if (CurrentUserIsPhotographer)
+        {
+            filters.PhotographerId = CurrentUserId;
+            filters.ClientId = null;
+            return;
+        }
+
+        filters.ClientId = CurrentUserId;
+        filters.PhotographerId = null;
+    }
+
+    private bool CanAccessBooking(BookingDto booking)
+    {
+        return CurrentUserIsAdmin ||
+            IsCurrentUser(booking.ClientId) ||
+            (CurrentUserIsPhotographer && IsCurrentUser(booking.PhotographerId));
+    }
+
+    private bool CanUpdateBookingStatus(BookingDto booking, string status)
+    {
+        if (CurrentUserIsAdmin)
+        {
+            return true;
+        }
+
+        if (CurrentUserIsPhotographer && IsCurrentUser(booking.PhotographerId))
+        {
+            return true;
+        }
+
+        return CurrentUserIsUser &&
+            IsCurrentUser(booking.ClientId) &&
+            string.Equals(status, "paid", StringComparison.OrdinalIgnoreCase);
     }
 }

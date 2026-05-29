@@ -22,6 +22,7 @@ export interface AuthSession {
     token: string;
     user: UserRecord;
     createdAt: string;
+    expiresAt: string;
 }
 
 export interface LoginCredentials {
@@ -59,6 +60,25 @@ export interface PasswordResetCompletePayload {
     email: string;
     code: string;
     newPassword: string;
+}
+
+export type ProblemReportStatus = 'new' | 'reviewed';
+
+export interface ProblemReport {
+    id: string;
+    reporterId: string;
+    reporterName: string;
+    reporterEmail: string;
+    reporterRole: UserRole;
+    title: string;
+    description: string;
+    status: ProblemReportStatus;
+    createdAt: string;
+}
+
+export interface ProblemReportInput {
+    title: string;
+    description: string;
 }
 
 export interface PhotographerPortfolio {

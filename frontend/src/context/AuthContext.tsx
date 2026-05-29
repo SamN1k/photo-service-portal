@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { authService } from '../services/authService';
+import { SESSION_EXPIRED_EVENT, authService } from '../services/authService';
 import type { AuthSession, LoginCredentials, SignUpPayload, UserRecord } from '../types/models';
 import { AuthContext, type AuthContextValue } from './authState';
 
@@ -28,6 +28,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSession(null);
     }, []);
 
+    useEffect(() => {
+        const handleSessionExpired = () => setSession(null);
+
+        window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+
+        return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+    }, []);
+
+    useEffect(() => {
+        if (!session) {
+            return undefined;
+        }
+
+        const expiresInMs = new Date(session.expiresAt).getTime() - Date.now();
+
+        const timeoutId = window.setTimeout(logout, Math.max(expiresInMs, 0));
+
+        return () => window.clearTimeout(timeoutId);
+    }, [logout, session]);
+
     const refreshUser = useCallback((user: UserRecord) => {
         const nextSession = authService.refreshSessionUser(user);
         setSession(nextSession);
@@ -37,7 +57,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         () => ({
             session,
             user: session?.user ?? null,
-            isAuthenticated: Boolean(session),
+            isAuthenticated: authService.isSessionValid(session),
             login,
             signUp,
             logout,
