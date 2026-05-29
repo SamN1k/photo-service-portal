@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PSP.BusinessLayer;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
 using PSP.Domain.Models;
@@ -8,8 +9,16 @@ using PSP.Domain.Models;
 namespace PSP.API.Controllers;
 
 [Route("api/offers")]
-public sealed class OffersController(IOfferLogic offerLogic) : ApiControllerBase
+public sealed class OffersController : ApiControllerBase
 {
+    private readonly IOfferLogic offerLogic;
+
+    public OffersController()
+    {
+        var businessLogic = new BusinessLogic();
+        offerLogic = businessLogic.GetOfferLogic();
+    }
+
     [HttpGet]
     [AllowAnonymous]
     public async Task<ActionResult<PaginatedResultDto<PhotoOfferDto>>> ListOffers([FromQuery] OfferListQueryDto filters)

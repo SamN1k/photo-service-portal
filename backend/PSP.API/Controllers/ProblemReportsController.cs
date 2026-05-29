@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PSP.BusinessLayer;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
 using PSP.Domain.Models;
@@ -9,8 +10,16 @@ namespace PSP.API.Controllers;
 
 [Route("api/reports")]
 [Authorize]
-public sealed class ProblemReportsController(IProblemReportLogic reportLogic) : ApiControllerBase
+public sealed class ProblemReportsController : ApiControllerBase
 {
+    private readonly IProblemReportLogic reportLogic;
+
+    public ProblemReportsController()
+    {
+        var businessLogic = new BusinessLogic();
+        reportLogic = businessLogic.GetProblemReportLogic();
+    }
+
     [HttpGet]
     [Authorize(Roles = "admin")]
     public async Task<ActionResult<PaginatedResultDto<ProblemReportDto>>> ListReports([FromQuery] ProblemReportListQueryDto filters)

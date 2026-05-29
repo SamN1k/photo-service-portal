@@ -1,15 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using PSP.BusinessLayer.Core;
-using PSP.BusinessLayer.Interfaces;
+using PSP.BusinessLayer.Security;
 using PSP.DataAccessLayer.Context;
 using PSP.Domain.Entities;
 using PSP.Domain.Models;
 
 namespace PSP.BusinessLayer.Structure;
 
-public class UserAction(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
+public class UserAction
 {
     private const int MaxPortfolioGalleryImages = 12;
+    private readonly Pbkdf2PasswordHasher passwordHasher = new();
 
     private static readonly HashSet<string> Roles = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -25,8 +26,10 @@ public class UserAction(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
         "suspended"
     };
 
-    public async Task<PaginatedResultDto<UserDto>> ListUsersAsync(UserListQueryDto query)
+    protected async Task<PaginatedResultDto<UserDto>> ListUsersActionAsync(UserListQueryDto query)
     {
+        using var db = new PhotoPortalDbContext();
+
         if (query.ForceError || string.Equals(query.Query?.Trim(), "eroare", StringComparison.OrdinalIgnoreCase))
         {
             throw new BusinessException(500, "Serviciul API pentru utilizatori a esuat.");
@@ -60,8 +63,9 @@ public class UserAction(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
         return await Pagination.FromQueryAsync(users, query.Page, query.PageSize, DtoMapper.ToDto);
     }
 
-    public async Task<UserDto> CreateUserAsync(UserInputDto input)
+    protected async Task<UserDto> CreateUserActionAsync(UserInputDto input)
     {
+        using var db = new PhotoPortalDbContext();
         var fullName = NormalizeRequired(input.FullName, "Numele utilizatorului este obligatoriu.");
         var email = NormalizeEmail(input.Email);
         var role = NormalizeAllowed(input.Role, Roles, "Rolul utilizatorului este invalid.");
@@ -91,14 +95,15 @@ public class UserAction(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
         return DtoMapper.ToDto(user);
     }
 
-    public async Task<UserDto> UpdateUserAsync(string userId, UserInputDto input)
+    protected async Task<UserDto> UpdateUserActionAsync(string userId, UserInputDto input)
     {
+        using var db = new PhotoPortalDbContext();
         var fullName = NormalizeRequired(input.FullName, "Numele utilizatorului este obligatoriu.");
         var email = NormalizeEmail(input.Email);
         var role = NormalizeAllowed(input.Role, Roles, "Rolul utilizatorului este invalid.");
         var status = NormalizeAllowed(input.Status, Statuses, "Statusul utilizatorului este invalid.");
 
-        var user = await FindUserAsync(userId);
+        var user = await FindUserAsync(db, userId);
         var emailIsUsed = await db.Users.AnyAsync(candidate => candidate.Id != userId && candidate.Email == email);
 
         if (emailIsUsed)
@@ -121,8 +126,9 @@ public class UserAction(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
         return DtoMapper.ToDto(user);
     }
 
-    public async Task<UserDto> UpdateAccountSettingsAsync(string userId, AccountSettingsInputDto input)
+    protected async Task<UserDto> UpdateAccountSettingsActionAsync(string userId, AccountSettingsInputDto input)
     {
+        using var db = new PhotoPortalDbContext();
         var fullName = NormalizeRequired(input.FullName, "Numele utilizatorului este obligatoriu.");
         var email = NormalizeEmail(input.Email);
         var currentPassword = NormalizeRequired(input.CurrentPassword, "Parola curenta este obligatorie.");
@@ -133,7 +139,7 @@ public class UserAction(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
             throw new BusinessException(422, "Parola noua trebuie sa aiba minimum 6 caractere.");
         }
 
-        var user = await FindUserAsync(userId);
+        var user = await FindUserAsync(db, userId);
 
         if (!passwordHasher.Verify(currentPassword, user.Password))
         {
@@ -160,15 +166,17 @@ public class UserAction(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
         return DtoMapper.ToDto(user);
     }
 
-    public async Task<PhotographerPortfolioDto> GetPhotographerPortfolioAsync(string photographerId)
+    protected async Task<PhotographerPortfolioDto> GetPhotographerPortfolioActionAsync(string photographerId)
     {
-        var photographer = await FindPhotographerAsync(photographerId);
+        using var db = new PhotoPortalDbContext();
+        var photographer = await FindPhotographerAsync(db, photographerId);
         return DtoMapper.ToPortfolioDto(photographer);
     }
 
-    public async Task<PhotographerPortfolioDto> UpdatePhotographerPortfolioAsync(string photographerId, PhotographerPortfolioInputDto input)
+    protected async Task<PhotographerPortfolioDto> UpdatePhotographerPortfolioActionAsync(string photographerId, PhotographerPortfolioInputDto input)
     {
-        var photographer = await FindPhotographerAsync(photographerId);
+        using var db = new PhotoPortalDbContext();
+        var photographer = await FindPhotographerAsync(db, photographerId);
         var fullName = NormalizeRequired(input.FullName, "Numele fotografului este obligatoriu.");
         var email = NormalizeEmail(input.Email);
         var emailIsUsed = await db.Users.AnyAsync(candidate => candidate.Id != photographerId && candidate.Email == email);
@@ -190,9 +198,10 @@ public class UserAction(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
         return DtoMapper.ToPortfolioDto(photographer);
     }
 
-    public async Task DeleteUserAsync(string userId)
+    protected async Task DeleteUserActionAsync(string userId)
     {
-        var user = await FindUserAsync(userId);
+        using var db = new PhotoPortalDbContext();
+        var user = await FindUserAsync(db, userId);
         var relatedBookings = await db.Bookings
             .Where(booking => booking.ClientId == userId || booking.PhotographerId == userId)
             .ToListAsync();
@@ -207,15 +216,15 @@ public class UserAction(PhotoPortalDbContext db, IPasswordHasher passwordHasher)
         await db.SaveChangesAsync();
     }
 
-    private async Task<UserEntity> FindUserAsync(string userId)
+    private static async Task<UserEntity> FindUserAsync(PhotoPortalDbContext db, string userId)
     {
         return await db.Users.FirstOrDefaultAsync(candidate => candidate.Id == userId)
             ?? throw new BusinessException(404, "Utilizatorul nu exista.");
     }
 
-    private async Task<UserEntity> FindPhotographerAsync(string photographerId)
+    private static async Task<UserEntity> FindPhotographerAsync(PhotoPortalDbContext db, string photographerId)
     {
-        var user = await FindUserAsync(photographerId);
+        var user = await FindUserAsync(db, photographerId);
 
         if (!string.Equals(user.Role, "photographer", StringComparison.OrdinalIgnoreCase))
         {

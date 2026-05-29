@@ -6,7 +6,7 @@ using PSP.Domain.Models;
 
 namespace PSP.BusinessLayer.Structure;
 
-public class BookingAction(PhotoPortalDbContext db)
+public class BookingAction
 {
     private static readonly HashSet<string> Statuses = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -17,8 +17,10 @@ public class BookingAction(PhotoPortalDbContext db)
         "finalized"
     };
 
-    public async Task<PaginatedResultDto<BookingDto>> ListBookingsAsync(BookingListQueryDto query)
+    protected async Task<PaginatedResultDto<BookingDto>> ListBookingsActionAsync(BookingListQueryDto query)
     {
+        using var db = new PhotoPortalDbContext();
+
         if (query.ForceError || string.Equals(query.Query?.Trim(), "eroare", StringComparison.OrdinalIgnoreCase))
         {
             throw new BusinessException(500, "Serviciul API pentru rezervari a esuat.");
@@ -59,20 +61,22 @@ public class BookingAction(PhotoPortalDbContext db)
         return await Pagination.FromQueryAsync(bookings, query.Page, query.PageSize, DtoMapper.ToDto);
     }
 
-    public async Task<BookingDto> GetBookingAsync(string bookingId)
+    protected async Task<BookingDto> GetBookingActionAsync(string bookingId)
     {
+        using var db = new PhotoPortalDbContext();
         var booking = await db.Bookings.AsNoTracking().FirstOrDefaultAsync(candidate => candidate.Id == bookingId)
             ?? throw new BusinessException(404, "Rezervarea nu exista.");
 
         return DtoMapper.ToDto(booking);
     }
 
-    public async Task<BookingDto> CreateBookingAsync(CreateBookingDto input)
+    protected async Task<BookingDto> CreateBookingActionAsync(CreateBookingDto input)
     {
+        using var db = new PhotoPortalDbContext();
         var normalizedInput = NormalizeInput(new BookingInputDto(input.OfferId, input.EventDate, input.Location, input.BudgetEur, input.Notes));
         var clientId = NormalizeRequired(input.ClientId, "Clientul este obligatoriu.");
         var clientName = NormalizeRequired(input.ClientName, "Numele clientului este obligatoriu.");
-        var offer = await FindOfferAsync(normalizedInput.OfferId);
+        var offer = await FindOfferAsync(db, normalizedInput.OfferId);
         var client = await db.Users.FirstOrDefaultAsync(user => user.Id == clientId)
             ?? throw new BusinessException(404, "Clientul nu exista.");
         var now = DateTimeOffset.UtcNow;
@@ -110,11 +114,12 @@ public class BookingAction(PhotoPortalDbContext db)
         return DtoMapper.ToDto(booking);
     }
 
-    public async Task<BookingDto> UpdateBookingAsync(string bookingId, BookingInputDto input)
+    protected async Task<BookingDto> UpdateBookingActionAsync(string bookingId, BookingInputDto input)
     {
+        using var db = new PhotoPortalDbContext();
         var normalizedInput = NormalizeInput(input);
-        var booking = await FindBookingAsync(bookingId);
-        var offer = await FindOfferAsync(normalizedInput.OfferId);
+        var booking = await FindBookingAsync(db, bookingId);
+        var offer = await FindOfferAsync(db, normalizedInput.OfferId);
 
         booking.OfferId = offer.Id;
         booking.OfferTitle = offer.Title;
@@ -131,10 +136,11 @@ public class BookingAction(PhotoPortalDbContext db)
         return DtoMapper.ToDto(booking);
     }
 
-    public async Task<BookingDto> UpdateBookingStatusAsync(string bookingId, UpdateBookingStatusDto input)
+    protected async Task<BookingDto> UpdateBookingStatusActionAsync(string bookingId, UpdateBookingStatusDto input)
     {
+        using var db = new PhotoPortalDbContext();
         var status = NormalizeAllowed(input.Status, Statuses, "Statusul rezervarii este invalid.");
-        var booking = await FindBookingAsync(bookingId);
+        var booking = await FindBookingAsync(db, bookingId);
 
         booking.Status = status;
         booking.UpdatedAt = DateTimeOffset.UtcNow;
@@ -144,21 +150,22 @@ public class BookingAction(PhotoPortalDbContext db)
         return DtoMapper.ToDto(booking);
     }
 
-    public async Task DeleteBookingAsync(string bookingId)
+    protected async Task DeleteBookingActionAsync(string bookingId)
     {
-        var booking = await FindBookingAsync(bookingId);
+        using var db = new PhotoPortalDbContext();
+        var booking = await FindBookingAsync(db, bookingId);
 
         db.Bookings.Remove(booking);
         await db.SaveChangesAsync();
     }
 
-    private async Task<BookingEntity> FindBookingAsync(string bookingId)
+    private static async Task<BookingEntity> FindBookingAsync(PhotoPortalDbContext db, string bookingId)
     {
         return await db.Bookings.FirstOrDefaultAsync(candidate => candidate.Id == bookingId)
             ?? throw new BusinessException(404, "Rezervarea nu exista.");
     }
 
-    private async Task<PhotoOfferEntity> FindOfferAsync(string offerId)
+    private static async Task<PhotoOfferEntity> FindOfferAsync(PhotoPortalDbContext db, string offerId)
     {
         return await db.Offers.FirstOrDefaultAsync(candidate => candidate.Id == offerId)
             ?? throw new BusinessException(404, "Oferta nu exista.");

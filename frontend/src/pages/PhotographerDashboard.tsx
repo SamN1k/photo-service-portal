@@ -82,7 +82,7 @@ const offerStatusTone: Record<OfferStatus, 'success' | 'warning' | 'neutral'> = 
 
 const canConfirmBooking = (status: BookingStatus) => status === 'pending';
 const canRejectBooking = (status: BookingStatus) => status === 'pending' || status === 'confirmed';
-const canFinalizeBooking = (status: BookingStatus) => status === 'confirmed' || status === 'paid';
+const canFinalizeBooking = (status: BookingStatus) => status === 'paid';
 
 const readImageAsDataUrl = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {

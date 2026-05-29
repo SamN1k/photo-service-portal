@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PSP.BusinessLayer;
 using PSP.BusinessLayer.Core;
 using PSP.BusinessLayer.Interfaces;
 using PSP.Domain.Models;
@@ -8,8 +9,16 @@ using PSP.Domain.Models;
 namespace PSP.API.Controllers;
 
 [Route("api/auth")]
-public sealed class AuthController(IAuthLogic authLogic) : ApiControllerBase
+public sealed class AuthController : ApiControllerBase
 {
+    private readonly IAuthLogic authLogic;
+
+    public AuthController()
+    {
+        var businessLogic = new BusinessLogic();
+        authLogic = businessLogic.GetAuthLogic();
+    }
+
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<ActionResult<AuthSessionDto>> Login([FromBody] LoginCredentialsDto credentials)

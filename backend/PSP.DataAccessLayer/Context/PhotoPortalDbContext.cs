@@ -1,14 +1,44 @@
 using Microsoft.EntityFrameworkCore;
+using PSP.DataAccessLayer;
 using PSP.Domain.Entities;
 
 namespace PSP.DataAccessLayer.Context;
 
-public sealed class PhotoPortalDbContext(DbContextOptions<PhotoPortalDbContext> options) : DbContext(options)
+public sealed class PhotoPortalDbContext : DbContext
 {
+    private const string DefaultConnectionString =
+        "Host=localhost;Port=5432;Database=psp_photo_portal;Username=postgres;Password=12345678";
+
+    public PhotoPortalDbContext()
+    {
+    }
+
+    public PhotoPortalDbContext(DbContextOptions<PhotoPortalDbContext> options)
+        : base(options)
+    {
+    }
+
     public DbSet<UserEntity> Users => Set<UserEntity>();
     public DbSet<PhotoOfferEntity> Offers => Set<PhotoOfferEntity>();
     public DbSet<BookingEntity> Bookings => Set<BookingEntity>();
     public DbSet<ProblemReportEntity> ProblemReports => Set<ProblemReportEntity>();
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (optionsBuilder.IsConfigured)
+        {
+            return;
+        }
+
+        var connectionString = DbSession.ConnectionString
+            ?? Environment.GetEnvironmentVariable("PSP_CONNECTION_STRING")
+            ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+            ?? DefaultConnectionString;
+
+        optionsBuilder.UseNpgsql(
+            connectionString,
+            npgsql => npgsql.MigrationsAssembly(typeof(PhotoPortalDbContext).Assembly.FullName));
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
